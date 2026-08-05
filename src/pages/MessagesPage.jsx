@@ -260,11 +260,12 @@ export const MessagesPage = ({ onSelectMember }) => {
 
     // Guardar en Historial de Contactos
     try {
+      const templateObj = templatesMap[selectedTemplateKey] || DEFAULT_TEMPLATES_MAP[selectedTemplateKey];
       await api.createContactLog({
         memberId: selectedMember.id,
-        memberName: selectedMember.name,
+        memberName: selectedMember.name || selectedMember.nombre || 'Miembro',
         type: channelType,
-        templateName: TEMPLATES[selectedTemplateKey]?.title || 'Mensaje directo',
+        templateName: templateObj?.title || 'Mensaje directo',
         messageText
       });
       fetchContactLogs();

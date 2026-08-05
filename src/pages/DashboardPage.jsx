@@ -3,6 +3,7 @@ import { Header } from '../components/Header';
 import { MetricCard } from '../components/MetricCard';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { getBadgeClass } from '../components/MemberTable';
 import { Users, MapPin, Star, AlertTriangle, CheckCircle2, ChevronRight } from 'lucide-react';
 
 export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToVisits }) => {
@@ -102,12 +103,8 @@ export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToV
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span className={`badge-status ${
-                        v.status?.toLowerCase() === 'verde' ? 'badge-verde' :
-                        v.status?.toLowerCase() === 'amarillo' ? 'badge-amarillo' :
-                        v.status?.toLowerCase() === 'rojo' ? 'badge-rojo' : 'badge-active'
-                      }`}>
-                        {v.status}
+                      <span className={`badge-status ${getBadgeClass(v.status)}`}>
+                        {v.status || 'Sin información'}
                       </span>
                       <button 
                         className="btn btn-secondary" 

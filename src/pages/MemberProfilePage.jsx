@@ -4,6 +4,7 @@ import { ConfirmModal } from '../components/ConfirmModal';
 import { SuccessModal } from '../components/SuccessModal';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { getBadgeClass, isOlderThan6Months } from '../components/MemberTable';
 import { 
   ArrowLeft, 
   Phone, 
@@ -194,15 +195,11 @@ export const MemberProfilePage = ({ member, onBack, onScheduleAppointment, onEdi
               )}
 
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
                   <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>{member.name || member.nombre}</h2>
                   <Star size={20} fill={member.isFavorite ? 'var(--accent-gold)' : 'none'} color={member.isFavorite ? 'var(--accent-gold)' : 'var(--text-light)'} />
-                  <span className={`badge-status ${
-                    member.status?.toLowerCase() === 'verde' ? 'badge-verde' :
-                    member.status?.toLowerCase() === 'amarillo' ? 'badge-amarillo' :
-                    member.status?.toLowerCase() === 'rojo' ? 'badge-rojo' : 'badge-active'
-                  }`}>
-                    {member.status}
+                  <span className={`badge-status ${getBadgeClass(member.status)}`}>
+                    {member.status || 'Sin información'}
                   </span>
                 </div>
 
@@ -235,6 +232,19 @@ export const MemberProfilePage = ({ member, onBack, onScheduleAppointment, onEdi
                     <CalendarIcon size={15} color="var(--primary)" /> Miembro desde: {member.memberSince || member.miembroDesde || 'N/A'}
                   </div>
                 </div>
+
+                {isOlderThan6Months(member.lastVisit) && (member.status || '').toLowerCase() !== 'inactivo' && (
+                  <div style={{ marginTop: '14px', background: '#fffbeb', border: '1px solid #fef3c7', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', color: '#92400e', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                    <span>⚠️ Este miembro no registra visitas ni actualizaciones en los últimos 6 meses.</span>
+                    <button
+                      className="btn btn-secondary"
+                      style={{ padding: '4px 10px', fontSize: '0.78rem', color: '#475569' }}
+                      onClick={() => onEditMember({ ...member, status: 'Inactivo' })}
+                    >
+                      Cambiar estado a Inactivo
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

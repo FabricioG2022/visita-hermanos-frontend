@@ -488,8 +488,14 @@ body {
 }
 
 .badge-inactive {
-  background-color: var(--status-inactive-bg);
-  color: var(--text-inactive-text);
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+.badge-sin-info {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
 }
 
 .badge-verde {
@@ -505,6 +511,18 @@ body {
 .badge-rojo {
   background-color: #fee2e2;
   color: #b91c1c;
+}
+
+body.dark-mode .badge-sin-info {
+  background-color: #334155;
+  color: #cbd5e1;
+  border-color: #475569;
+}
+
+body.dark-mode .badge-inactive {
+  background-color: #334155;
+  color: #cbd5e1;
+  border: 1px solid #475569;
 }
 
 .star-btn {

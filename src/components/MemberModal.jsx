@@ -9,7 +9,7 @@ export const MemberModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
     address: '',
     birthDate: '',
     notes: '',
-    status: 'Activo',
+    status: 'Sin información',
     isFavorite: false
   });
 
@@ -22,7 +22,7 @@ export const MemberModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
         address: initialData.address || '',
         birthDate: initialData.birthDate || '',
         notes: initialData.notes || '',
-        status: initialData.status || 'Activo',
+        status: initialData.status || 'Sin información',
         isFavorite: Boolean(initialData.isFavorite)
       });
     } else {
@@ -33,7 +33,7 @@ export const MemberModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
         address: '',
         birthDate: '',
         notes: '',
-        status: 'Activo',
+        status: 'Sin información',
         isFavorite: false
       });
     }
@@ -142,8 +142,11 @@ export const MemberModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               >
-                <option value="Activo">Activo</option>
-                <option value="Inactivo">Inactivo</option>
+                <option value="Sin información">⚪ Sin información (Alta nueva / Sin evaluar)</option>
+                <option value="Verde">🟢 Verde (Estado óptimo / Bien)</option>
+                <option value="Amarillo">🟡 Amarillo (Atención regular / Más o menos)</option>
+                <option value="Rojo">🔴 Rojo (Atención urgente / Necesitado)</option>
+                <option value="Inactivo">⏸️ Inactivo (Inactivo / +6 meses sin contacto)</option>
               </select>
             </div>
             <div className="form-group" style={{ display: 'flex', alignItems: 'center', marginTop: '24px' }}>

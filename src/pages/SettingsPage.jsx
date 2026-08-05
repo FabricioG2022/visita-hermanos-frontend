@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { api } from '../services/api';
 import { SuccessModal } from '../components/SuccessModal';
 import { 
@@ -22,15 +23,11 @@ import {
 
 export const SettingsPage = () => {
   const { user, updateUserProfile } = useAuth();
+  const { darkMode, toggleDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState('users');
 
   // Estado para Modal de Feedback estilizado
   const [modalFeedback, setModalFeedback] = useState({ isOpen: false, title: '', message: '' });
-  
-  // Theme (Modo Claro / Oscuro)
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem('theme') === 'dark' || document.body.classList.contains('dark-mode');
-  });
 
   // Sección A: Usuarios
   const [usersList, setUsersList] = useState([]);
@@ -91,16 +88,6 @@ export const SettingsPage = () => {
       }));
     }
   }, [user]);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.body.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [darkMode]);
 
   // Cargar usuarios para Sección A
   const fetchUsers = async () => {
@@ -626,7 +613,7 @@ export const SettingsPage = () => {
                   type="button"
                   className={`btn ${darkMode ? 'btn-primary' : 'btn-secondary'}`}
                   style={{ gap: '10px', fontSize: '0.95rem' }}
-                  onClick={() => setDarkMode(!darkMode)}
+                  onClick={toggleDarkMode}
                 >
                   {darkMode ? <Sun size={20} color="#f59e0b" /> : <Moon size={20} color="var(--primary)" />}
                   <span>{darkMode ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}</span>
