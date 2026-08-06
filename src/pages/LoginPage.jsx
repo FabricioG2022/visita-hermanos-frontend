@@ -162,11 +162,6 @@ export const LoginPage = () => {
               </div>
             </div>
 
-            <div style={{ background: 'var(--bg-main)', padding: '12px', borderRadius: '8px', margin: '16px 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              <strong>Credenciales Demo en Firebase Auth:</strong>
-              <div>• Admin: <code>admin@visita.com</code> / <code>admin123</code></div>
-            </div>
-
             <button
               type="submit"
               className="btn btn-primary"
