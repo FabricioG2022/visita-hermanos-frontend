@@ -1,6 +1,6 @@
 # Web Visita Hermanos - Sistema de Gestión
 
-Este proyecto ha sido desarrollado siguiendo la consigna del **Examen Final de Plataformas de Desarrollo**. Se compone de dos aplicaciones independientes: un **Backend API REST** desarrollado en Node.js + Express con seguridad JWT, y un **Frontend** moderno en React + Vite que replica las pantallas diseñadas en Figma.
+Se compone de dos aplicaciones independientes: un **Backend API REST** desarrollado en Node.js + Express con seguridad JWT, y un **Frontend** moderno en React + Vite.
 
 ---
 
