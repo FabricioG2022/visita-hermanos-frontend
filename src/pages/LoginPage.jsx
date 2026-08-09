@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { UserCheck, Lock, Mail, User, ArrowRight, KeyRound, CheckCircle, ArrowLeft } from 'lucide-react';
+import { UserCheck, Lock, Mail, ArrowRight, KeyRound, CheckCircle, ArrowLeft, Shield } from 'lucide-react';
 
 export const LoginPage = () => {
-  const { login, register, forgotPassword } = useAuth();
+  const { login, forgotPassword } = useAuth();
 
-  // Modos de vista: 'login', 'register', 'forgot'
+  // Modos de vista: 'login', 'forgot'
   const [mode, setMode] = useState('login');
 
-  // Campos de formulario (siempre en blanco)
+  // Campos de formulario
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
 
   // Mensajes de error e información
   const [error, setError] = useState('');
@@ -27,20 +26,6 @@ export const LoginPage = () => {
       await login(email, password);
     } catch (err) {
       setError(err.message || 'Error al iniciar sesión');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmitRegister = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccessMsg('');
-    setLoading(true);
-    try {
-      await register(name, email, password);
-    } catch (err) {
-      setError(err.message || 'Error al registrar usuario');
     } finally {
       setLoading(false);
     }
@@ -84,18 +69,15 @@ export const LoginPage = () => {
             justifyContent: 'center',
             margin: '0 auto 12px auto'
           }}>
-            {mode === 'login' && <UserCheck size={32} color="var(--primary)" />}
-            {mode === 'register' && <User size={32} color="var(--primary)" />}
+            {mode === 'login' && <Shield size={32} color="var(--primary)" />}
             {mode === 'forgot' && <KeyRound size={32} color="var(--primary)" />}
           </div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)' }}>
             {mode === 'login' && 'Visita Hermanos'}
-            {mode === 'register' && 'Registro de Visitador'}
             {mode === 'forgot' && 'Recuperar Contraseña'}
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            {mode === 'login' && 'Plataforma de Gestión e Integración API REST'}
-            {mode === 'register' && 'Crea tu cuenta de voluntario para visitas de campo'}
+            {mode === 'login' && 'Plataforma Privada de Gestión Pastoral'}
             {mode === 'forgot' && 'Ingresa tu correo para enviarte el enlace de recuperación'}
           </p>
         </div>
@@ -165,109 +147,29 @@ export const LoginPage = () => {
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center', marginTop: '8px' }}
+              style={{ width: '100%', justifyContent: 'center', marginTop: '12px' }}
               disabled={loading}
             >
-              {loading ? 'Autenticando en Firebase...' : 'Ingresar a la Plataforma'} <ArrowRight size={18} />
+              {loading ? 'Autenticando...' : 'Ingresar a la Plataforma'} <ArrowRight size={18} />
             </button>
 
-            <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              ¿No tienes una cuenta aún?{' '}
-              <button
-                type="button"
-                style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', padding: 0 }}
-                onClick={() => {
-                  setError('');
-                  setSuccessMsg('');
-                  setEmail('');
-                  setPassword('');
-                  setMode('register');
-                }}
-              >
-                Regístrate aquí
-              </button>
+            <div style={{
+              marginTop: '24px',
+              padding: '12px 14px',
+              backgroundColor: '#f8fafc',
+              border: '1px dashed #cbd5e1',
+              borderRadius: '10px',
+              textAlign: 'center',
+              fontSize: '0.8rem',
+              color: 'var(--text-muted)',
+              lineHeight: '1.4'
+            }}>
+              🔒 <strong>Acceso Restringido:</strong> Esta plataforma es de uso exclusivo para el Pastor y visitadores autorizados. Los usuarios son dados de alta únicamente por la administración pastoral.
             </div>
           </form>
         )}
 
-        {/* MODO 2: REGISTRO DE VISITADOR */}
-        {mode === 'register' && (
-          <form onSubmit={handleSubmitRegister} autoComplete="off" style={{ textAlign: 'left' }}>
-            <div className="form-group">
-              <label>Nombre Completo *</label>
-              <div className="search-input-box" style={{ width: '100%' }}>
-                <User size={18} color="var(--text-muted)" />
-                <input
-                  type="text"
-                  required
-                  autoComplete="off"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Correo Electrónico *</label>
-              <div className="search-input-box" style={{ width: '100%' }}>
-                <Mail size={18} color="var(--text-muted)" />
-                <input
-                  type="email"
-                  required
-                  autoComplete="off"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Contraseña (mínimo 6 caracteres) *</label>
-              <div className="search-input-box" style={{ width: '100%' }}>
-                <Lock size={18} color="var(--text-muted)" />
-                <input
-                  type="password"
-                  required
-                  minLength={6}
-                  autoComplete="new-password"
-                  autoCorrect="off"
-                  spellCheck="false"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center', marginTop: '16px' }}
-              disabled={loading}
-            >
-              {loading ? 'Creando cuenta...' : 'Registrarme como Visitador'}
-            </button>
-
-            <div style={{ marginTop: '16px', textAlign: 'center' }}>
-              <button
-                type="button"
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                onClick={() => {
-                  setError('');
-                  setSuccessMsg('');
-                  setMode('login');
-                }}
-              >
-                <ArrowLeft size={16} /> Volver al Login
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* MODO 3: OLVIDASTE LA CONTRASEÑA */}
+        {/* MODO 2: OLVIDASTE LA CONTRASEÑA */}
         {mode === 'forgot' && (
           <form onSubmit={handleSubmitForgot} autoComplete="off" style={{ textAlign: 'left' }}>
             <div className="form-group">

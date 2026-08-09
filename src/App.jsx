@@ -9,6 +9,7 @@ import { MemberProfilePage } from './pages/MemberProfilePage';
 import { VisitsPage } from './pages/VisitsPage';
 import { AppointmentsPage } from './pages/AppointmentsPage';
 import { MessagesPage } from './pages/MessagesPage';
+import { ReportsPage } from './pages/ReportsPage';
 import { VersePage } from './pages/VersePage';
 import { SettingsPage } from './pages/SettingsPage';
 import { MemberModal } from './components/MemberModal';
@@ -248,6 +249,19 @@ const AppContent = () => {
 
         {activeTab === 'messages' && (
           <MessagesPage onSelectMember={handleSelectMember} />
+        )}
+
+        {activeTab === 'reports' && (
+          user?.role === 'admin' ? (
+            <ReportsPage onSelectMember={handleSelectMember} />
+          ) : (
+            <DashboardPage
+              onNavigateToMembers={handleNavigateToMembersWithFilter}
+              onViewMember={handleViewRecentVisitMember}
+              onNavigateToVisits={() => navigateToTab('visits')}
+              onScheduleAppointment={() => handleScheduleAppointment(null)}
+            />
+          )
         )}
 
         {activeTab === 'settings' && (

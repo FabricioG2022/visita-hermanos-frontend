@@ -5,6 +5,7 @@ import { SuccessModal } from '../components/SuccessModal';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { getBadgeClass, isOlderThan6Months } from '../components/MemberTable';
+import { VisitModal } from '../components/VisitModal';
 import { 
   ArrowLeft, 
   Phone, 
@@ -21,16 +22,50 @@ import {
   XCircle,
   ExternalLink,
   MessageCircle,
-  FileText
+  FileText,
+  Plus
 } from 'lucide-react';
 
 export const MemberProfilePage = ({ member, onBack, onScheduleAppointment, onEditMember, onDeleteMember, appointmentsVersion = 0 }) => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('info');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
   const [memberAppointments, setMemberAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [modalFeedback, setModalFeedback] = useState({ isOpen: false, title: '', message: '' });
+
+  // Handler para creación de visitas desde perfil de miembro
+  const handleCreateVisit = async (visitData) => {
+    try {
+      await api.createVisit(visitData);
+      setIsVisitModalOpen(false);
+      
+      const newVisitItem = {
+        fecha: visitData.date,
+        visitador: visitData.responsible,
+        nota: visitData.summary,
+        nuevoEstadoAnimico: visitData.status
+      };
+      
+      if (!member.historialVisitas) member.historialVisitas = [];
+      member.historialVisitas.unshift(newVisitItem);
+      member.lastVisit = visitData.date;
+      member.status = visitData.status;
+
+      setModalFeedback({
+        isOpen: true,
+        title: '¡Visita Registrada con Éxito!',
+        message: `La visita realizada por ${visitData.responsible} el ${visitData.date} ha sido registrada correctamente.`
+      });
+    } catch (err) {
+      setModalFeedback({
+        isOpen: true,
+        title: 'Error al registrar visita',
+        message: err.message || 'No se pudo guardar la visita.'
+      });
+    }
+  };
 
   // Estados para notas de campo
   const [newNoteText, setNewNoteText] = useState('');
@@ -141,9 +176,11 @@ export const MemberProfilePage = ({ member, onBack, onScheduleAppointment, onEdi
         subtitle="Ver detalles y acciones"
         actionButton={
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button className="btn btn-secondary" onClick={() => onEditMember(member)}>
-              <Pencil size={16} /> Editar datos
-            </button>
+            {user?.role === 'admin' && (
+              <button className="btn btn-secondary" onClick={() => onEditMember(member)}>
+                <Pencil size={16} /> Editar datos
+              </button>
+            )}
             {user?.role === 'admin' && (
               <button
                 className="btn btn-secondary"
@@ -320,7 +357,13 @@ export const MemberProfilePage = ({ member, onBack, onScheduleAppointment, onEdi
 
           {activeTab === 'visits' && (
             <div>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '12px' }}>Historial de Visitas</h4>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>Historial de Visitas de Campo</h4>
+                <button className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '0.8rem', gap: '6px' }} onClick={() => setIsVisitModalOpen(true)}>
+                  <Plus size={16} /> Registrar visita
+                </button>
+              </div>
+
               {member.historialVisitas && member.historialVisitas.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {member.historialVisitas.map((v, idx) => (
@@ -347,8 +390,13 @@ export const MemberProfilePage = ({ member, onBack, onScheduleAppointment, onEdi
                   ))}
                 </div>
               ) : (
-                <div style={{ background: 'var(--bg-main)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                  Última visita registrada: <strong>{member.lastVisit || member.ultimaVisita || 'Sin visitas'}</strong>. No hay más detalles de historial.
+                <div style={{ background: 'var(--bg-main)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.9rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                  <p style={{ marginBottom: '12px' }}>
+                    Última visita registrada: <strong>{member.lastVisit || member.ultimaVisita || 'Sin visitas'}</strong>. No hay más detalles de historial.
+                  </p>
+                  <button className="btn btn-secondary" style={{ fontSize: '0.8rem', margin: '0 auto', gap: '6px' }} onClick={() => setIsVisitModalOpen(true)}>
+                    <Plus size={16} /> Registrar la primera visita
+                  </button>
                 </div>
               )}
             </div>
@@ -491,6 +539,13 @@ export const MemberProfilePage = ({ member, onBack, onScheduleAppointment, onEdi
           )}
         </div>
       </div>
+
+      <VisitModal
+        isOpen={isVisitModalOpen}
+        onClose={() => setIsVisitModalOpen(false)}
+        onSubmit={handleCreateVisit}
+        member={member}
+      />
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}

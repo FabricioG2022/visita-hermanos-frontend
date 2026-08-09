@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Header } from '../components/Header';
 import { SuccessModal } from '../components/SuccessModal';
 import { api } from '../services/api';
-import { Calendar, Clock, User, MapPin, Search, Plus, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Clock, User, MapPin, Search, Plus, CheckCircle, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appointmentsVersion = 0 }) => {
   const [appointments, setAppointments] = useState([]);
@@ -10,6 +10,10 @@ export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appoin
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [modalFeedback, setModalFeedback] = useState({ isOpen: false, title: '', message: '' });
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const fetchAppointments = async () => {
     try {
@@ -26,6 +30,11 @@ export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appoin
   useEffect(() => {
     fetchAppointments();
   }, [appointmentsVersion]);
+
+  // Resetear a página 1 al filtrar o buscar
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
@@ -58,6 +67,10 @@ export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appoin
 
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.ceil(filteredAppointments.length / ITEMS_PER_PAGE) || 1;
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedAppointments = filteredAppointments.slice((validCurrentPage - 1) * ITEMS_PER_PAGE, validCurrentPage * ITEMS_PER_PAGE);
 
   return (
     <div>
@@ -121,103 +134,159 @@ export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appoin
             </button>
           </div>
         ) : (
-          <div className="table-card">
-            <table className="custom-table">
-              <thead>
-                <tr>
-                  <th>Miembro</th>
-                  <th>Fecha y Hora</th>
-                  <th>Visitador / Responsable</th>
-                  <th>Tipo y Lugar</th>
-                  <th>Observaciones</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAppointments.map(a => {
-                  const statusLower = (a.status || 'pendiente').toLowerCase();
-                  const badgeClass = 
-                    statusLower === 'realizada' ? 'badge-verde' :
-                    statusLower === 'cancelada' ? 'badge-rojo' : 'badge-amarillo';
+          <>
+            <div className="table-card">
+              <table className="custom-table">
+                <thead>
+                  <tr>
+                    <th>Miembro</th>
+                    <th>Fecha y Hora</th>
+                    <th>Visitador / Responsable</th>
+                    <th>Tipo y Lugar</th>
+                    <th>Observaciones</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedAppointments.map(a => {
+                    const statusLower = (a.status || 'pendiente').toLowerCase();
+                    const badgeClass = 
+                      statusLower === 'realizada' ? 'badge-verde' :
+                      statusLower === 'cancelada' ? 'badge-rojo' : 'badge-amarillo';
 
-                  return (
-                    <tr key={a.id}>
-                      <td>
-                        <div style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
-                          {a.memberName || 'Miembro General'}
-                        </div>
-                      </td>
-
-                      <td>
-                        <div style={{ fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                          <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Calendar size={14} color="var(--primary)" /> {a.date}
-                          </span>
-                          <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}>
-                            <Clock size={12} /> {a.time} hs
-                          </span>
-                        </div>
-                      </td>
-
-                      <td>
-                        <div style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <User size={14} color="var(--text-muted)" />
-                          <span>{a.responsible || 'Coordinador'}</span>
-                        </div>
-                      </td>
-
-                      <td>
-                        <div style={{ fontSize: '0.85rem' }}>
-                          <div style={{ fontWeight: 600 }}>{a.visitType || 'Visita'}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                            <MapPin size={12} /> {a.location || 'Domicilio'}
+                    return (
+                      <tr key={a.id}>
+                        <td>
+                          <div style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
+                            {a.memberName || 'Miembro General'}
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      <td style={{ maxWidth: '240px' }}>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-dark)', lineHeight: '1.4' }}>
-                          {a.observations || 'Sin observaciones.'}
-                        </div>
-                      </td>
+                        <td>
+                          <div style={{ fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Calendar size={14} color="var(--primary)" /> {a.date}
+                            </span>
+                            <span style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem' }}>
+                              <Clock size={12} /> {a.time} hs
+                            </span>
+                          </div>
+                        </td>
 
-                      <td>
-                        <span className={`badge-status ${badgeClass}`}>
-                          {a.status || 'Pendiente'}
-                        </span>
-                      </td>
+                        <td>
+                          <div style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <User size={14} color="var(--text-muted)" />
+                            <span>{a.responsible || 'Coordinador'}</span>
+                          </div>
+                        </td>
 
-                      <td>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          {statusLower !== 'realizada' && (
-                            <button
-                              className="btn btn-secondary"
-                              style={{ padding: '4px 8px', fontSize: '0.75rem', color: '#16a34a' }}
-                              title="Marcar como realizada"
-                              onClick={() => handleUpdateStatus(a.id, 'Realizada')}
-                            >
-                              <CheckCircle size={14} /> Realizada
-                            </button>
-                          )}
-                          {statusLower !== 'cancelada' && (
-                            <button
-                              className="btn btn-secondary"
-                              style={{ padding: '4px 8px', fontSize: '0.75rem', color: '#dc2626' }}
-                              title="Marcar como cancelada"
-                              onClick={() => handleUpdateStatus(a.id, 'Cancelada')}
-                            >
-                              <XCircle size={14} /> Cancelar
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <td>
+                          <div style={{ fontSize: '0.85rem' }}>
+                            <div style={{ fontWeight: 600 }}>{a.visitType || 'Visita'}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                              <MapPin size={12} /> {a.location || 'Domicilio'}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td style={{ maxWidth: '240px' }}>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-dark)', lineHeight: '1.4' }}>
+                            {a.observations || 'Sin observaciones.'}
+                          </div>
+                        </td>
+
+                        <td>
+                          <span className={`badge-status ${badgeClass}`}>
+                            {a.status || 'Pendiente'}
+                          </span>
+                        </td>
+
+                        <td>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            {statusLower !== 'realizada' && (
+                              <button
+                                className="btn btn-secondary"
+                                style={{ padding: '4px 8px', fontSize: '0.75rem', color: '#16a34a' }}
+                                title="Marcar como realizada"
+                                onClick={() => handleUpdateStatus(a.id, 'Realizada')}
+                              >
+                                <CheckCircle size={14} /> Realizada
+                              </button>
+                            )}
+                            {statusLower !== 'cancelada' && (
+                              <button
+                                className="btn btn-secondary"
+                                style={{ padding: '4px 8px', fontSize: '0.75rem', color: '#dc2626' }}
+                                title="Marcar como cancelada"
+                                onClick={() => handleUpdateStatus(a.id, 'Cancelada')}
+                              >
+                                <XCircle size={14} /> Cancelar
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Controles de Paginación */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: '20px',
+              padding: '12px 16px',
+              background: 'var(--card-bg, #ffffff)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '12px',
+              fontSize: '0.85rem',
+              color: 'var(--text-muted)',
+              flexWrap: 'wrap',
+              gap: '10px'
+            }}>
+              <span>
+                Mostrando <strong>{paginatedAppointments.length > 0 ? (validCurrentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</strong> a <strong>{Math.min(validCurrentPage * ITEMS_PER_PAGE, filteredAppointments.length)}</strong> de <strong>{filteredAppointments.length}</strong> citas agendadas
+              </span>
+
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                  disabled={validCurrentPage === 1}
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                >
+                  <ChevronLeft size={16} /> Anterior
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    className={`btn ${pageNum === validCurrentPage ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ padding: '6px 12px', fontSize: '0.8rem', minWidth: '32px', justifyContent: 'center' }}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                  disabled={validCurrentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                >
+                  Siguiente <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
 

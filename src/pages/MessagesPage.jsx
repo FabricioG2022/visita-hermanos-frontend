@@ -21,7 +21,10 @@ import {
   FileText,
   History,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Search,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 export const MessagesPage = ({ onSelectMember }) => {
@@ -58,9 +61,40 @@ export const MessagesPage = ({ onSelectMember }) => {
   const [appointments, setAppointments] = useState([]);
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [selectedTemplateKey, setSelectedTemplateKey] = useState('coordinar');
-  const [customText, setCustomText] = useState('');
   const [contactLogs, setContactLogs] = useState([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
+
+  // Estados para Búsqueda y Paginación en Historial de Mensajes
+  const [logSearchQuery, setLogSearchQuery] = useState('');
+  const [appliedLogSearchQuery, setAppliedLogSearchQuery] = useState('');
+  const [logCurrentPage, setLogCurrentPage] = useState(1);
+  const LOGS_PER_PAGE = 5;
+
+  const filteredLogs = contactLogs.filter(log => {
+    if (!appliedLogSearchQuery.trim()) return true;
+    const q = appliedLogSearchQuery.toLowerCase();
+    const mName = (log.memberName || '').toLowerCase();
+    const mText = (log.messageText || '').toLowerCase();
+    const mTmpl = (log.templateName || '').toLowerCase();
+    const mType = (log.type || '').toLowerCase();
+    return mName.includes(q) || mText.includes(q) || mTmpl.includes(q) || mType.includes(q);
+  });
+
+  const totalLogPages = Math.ceil(filteredLogs.length / LOGS_PER_PAGE) || 1;
+  const currentLogPage = Math.min(logCurrentPage, totalLogPages);
+  const paginatedLogs = filteredLogs.slice((currentLogPage - 1) * LOGS_PER_PAGE, currentLogPage * LOGS_PER_PAGE);
+
+  const handleSearchLogs = (e) => {
+    if (e) e.preventDefault();
+    setAppliedLogSearchQuery(logSearchQuery);
+    setLogCurrentPage(1);
+  };
+
+  const handleClearLogSearch = () => {
+    setLogSearchQuery('');
+    setAppliedLogSearchQuery('');
+    setLogCurrentPage(1);
+  };
 
   // Plantillas predefinidas y personalizadas del sistema
   const DEFAULT_TEMPLATES_MAP = {
@@ -791,33 +825,110 @@ export const MessagesPage = ({ onSelectMember }) => {
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <History size={18} color="var(--primary)" /> Historial de Contactos Registrados
               </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
                 Registro de mensajes y recordatorios enviados a los miembros
               </p>
 
+              {/* Bar de Búsqueda y Filtrado */}
+              <form onSubmit={handleSearchLogs} style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                <div className="search-input-box" style={{ flex: 1 }}>
+                  <Search size={16} color="var(--text-muted)" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por miembro o palabra clave..."
+                    value={logSearchQuery}
+                    onChange={(e) => setLogSearchQuery(e.target.value)}
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary" style={{ padding: '0 16px', gap: '6px' }}>
+                  <Search size={16} /> Buscar
+                </button>
+                {appliedLogSearchQuery && (
+                  <button type="button" className="btn btn-secondary" onClick={handleClearLogSearch} style={{ padding: '0 12px' }}>
+                    Limpiar
+                  </button>
+                )}
+              </form>
+
               {loadingLogs ? (
                 <p style={{ color: 'var(--text-muted)' }}>Cargando historial de envíos...</p>
-              ) : contactLogs.length === 0 ? (
+              ) : filteredLogs.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
-                  Aún no hay mensajes registrados en el historial.
+                  {appliedLogSearchQuery 
+                    ? `No se encontraron mensajes que coincidan con "${appliedLogSearchQuery}".` 
+                    : 'Aún no hay mensajes registrados en el historial.'}
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '420px', overflowY: 'auto' }}>
-                  {contactLogs.map(log => (
-                    <div key={log.id} style={{ background: 'var(--bg-main)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                        <strong style={{ fontSize: '0.88rem', color: 'var(--text-dark)' }}>{log.memberName}</strong>
-                        <span className="badge-status badge-verde" style={{ fontSize: '0.7rem' }}>{log.type}</span>
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minHeight: '220px' }}>
+                    {paginatedLogs.map(log => (
+                      <div key={log.id} style={{ background: 'var(--bg-main)', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <strong style={{ fontSize: '0.88rem', color: 'var(--text-dark)' }}>{log.memberName}</strong>
+                          <span className="badge-status badge-verde" style={{ fontSize: '0.7rem' }}>{log.type}</span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                          Plantilla: {log.templateName} • {new Date(log.timestamp).toLocaleString('es-AR')}
+                        </div>
+                        <div style={{ fontSize: '0.82rem', color: 'var(--text-dark)', fontStyle: 'italic' }}>
+                          "{log.messageText}"
+                        </div>
                       </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                        Plantilla: {log.templateName} • {new Date(log.timestamp).toLocaleString('es-AR')}
-                      </div>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-dark)', fontStyle: 'italic' }}>
-                        "{log.messageText}"
-                      </div>
+                    ))}
+                  </div>
+
+                  {/* Control de Paginación */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginTop: '16px',
+                    paddingTop: '12px',
+                    borderTop: '1px solid var(--border-color)',
+                    fontSize: '0.82rem',
+                    color: 'var(--text-muted)',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                  }}>
+                    <span>
+                      Página <strong>{currentLogPage}</strong> de <strong>{totalLogPages}</strong> ({filteredLogs.length} mensajes)
+                    </span>
+
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        style={{ padding: '4px 8px', fontSize: '0.8rem' }}
+                        disabled={currentLogPage === 1}
+                        onClick={() => setLogCurrentPage(prev => Math.max(prev - 1, 1))}
+                      >
+                        <ChevronLeft size={16} /> Anterior
+                      </button>
+
+                      {Array.from({ length: totalLogPages }, (_, i) => i + 1).map(pageNum => (
+                        <button
+                          key={pageNum}
+                          type="button"
+                          className={`btn ${pageNum === currentLogPage ? 'btn-primary' : 'btn-secondary'}`}
+                          style={{ padding: '4px 10px', fontSize: '0.8rem', minWidth: '30px', justifyContent: 'center' }}
+                          onClick={() => setLogCurrentPage(pageNum)}
+                        >
+                          {pageNum}
+                        </button>
+                      ))}
+
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        style={{ padding: '4px 8px', fontSize: '0.8rem' }}
+                        disabled={currentLogPage === totalLogPages}
+                        onClick={() => setLogCurrentPage(prev => Math.min(prev + 1, totalLogPages))}
+                      >
+                        Siguiente <ChevronRight size={16} />
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                </>
               )}
             </div>
 

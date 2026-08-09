@@ -132,17 +132,19 @@ export const MemberTable = ({ members, onSelectMember, onToggleFavorite, onEditM
                         Ver Perfil <ChevronRight size={14} />
                       </button>
 
-                      <button
-                        className="btn btn-secondary"
-                        style={{ padding: '6px 10px', fontSize: '0.8rem' }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEditMember(member);
-                        }}
-                        title="Editar miembro"
-                      >
-                        <Pencil size={15} color="var(--primary)" />
-                      </button>
+                      {userRole === 'admin' && (
+                        <button
+                          className="btn btn-secondary"
+                          style={{ padding: '6px 10px', fontSize: '0.8rem' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditMember(member);
+                          }}
+                          title="Editar miembro"
+                        >
+                          <Pencil size={15} color="var(--primary)" />
+                        </button>
+                      )}
 
                       {userRole === 'admin' && (
                         <button

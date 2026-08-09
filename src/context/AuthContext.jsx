@@ -31,13 +31,6 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
-  const register = async (name, email, password) => {
-    const data = await api.register(name, email, password);
-    localStorage.setItem('jwt_token', data.token);
-    setUser(data.user);
-    return data.user;
-  };
-
   const forgotPassword = async (email) => {
     return await api.forgotPassword(email);
   };
@@ -55,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, forgotPassword, updateUserProfile, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, forgotPassword, updateUserProfile, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -19,6 +19,10 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
   const [editingMember, setEditingMember] = useState(null);
   const [modalFeedback, setModalFeedback] = useState({ isOpen: false, title: '', message: '' });
 
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
   useEffect(() => {
     setFilterMode(initialFilter);
   }, [initialFilter]);
@@ -41,6 +45,11 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
   useEffect(() => {
     fetchMembers();
   }, []);
+
+  // Resetear paginado al buscar o filtrar
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterMode, sortBy]);
 
   // Función de parseo correcto de fechas DD/MM/YYYY o DD-MM-YYYY a Timestamp
   const parseSpanishDate = (dateStr) => {
@@ -67,11 +76,10 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
       .toLowerCase()
       .trim();
 
-  // Lógica de Filtrado (incluyendo búsqueda instantánea 0ms) y Ordenamiento dinámico
+  // Lógica de Filtrado y Ordenamiento dinámico
   const getFilteredAndSortedMembers = () => {
     let list = [...members];
 
-    // Aplicar búsqueda en cliente sin saturar servidor
     if (search.trim()) {
       const q = normalizeStr(search);
       list = list.filter(m =>
@@ -83,7 +91,6 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
       );
     }
 
-    // Aplicar filtro si viene de las tarjetas KPI o select desplegable
     if (filterMode === 'favorites') {
       list = list.filter(m => Boolean(m.isFavorite));
     } else if (filterMode === 'urgent' || filterMode === 'rojo') {
@@ -186,6 +193,9 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
   };
 
   const sortedMembers = getFilteredAndSortedMembers();
+  const totalPages = Math.ceil(sortedMembers.length / ITEMS_PER_PAGE) || 1;
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedMembers = sortedMembers.slice((validCurrentPage - 1) * ITEMS_PER_PAGE, validCurrentPage * ITEMS_PER_PAGE);
 
   return (
     <div>
@@ -223,22 +233,21 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
           </div>
         )}
 
-        {/* Filtros y búsqueda */}
-        <div className="table-controls">
+        {/* Controles de Búsqueda, Filtro KPI y Ordenamiento */}
+        <div className="table-controls" style={{ marginBottom: '24px' }}>
           <div className="search-input-box">
             <Search size={18} color="var(--text-muted)" />
             <input
               type="text"
-              placeholder="Buscar miembro por nombre, tel o email..."
+              placeholder="Buscar por nombre, teléfono, correo o notas..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Filter size={15} color="var(--text-muted)" />
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>Filtrar por estado:</span>
               <select
                 className="form-control"
                 style={{ width: 'auto', padding: '8px 12px', fontWeight: 600 }}
@@ -246,12 +255,12 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
                 onChange={(e) => setFilterMode(e.target.value)}
               >
                 <option value="all">Todos los miembros</option>
-                <option value="sin_info">⚪ Sin información (Nuevos)</option>
-                <option value="verde">🟢 Verde (Estado óptimo)</option>
-                <option value="amarillo">🟡 Amarillo (Atención regular)</option>
-                <option value="urgent">🔴 Rojo (Atención urgente)</option>
-                <option value="inactivos">⏸️ Inactivos (+6 meses sin visita)</option>
-                <option value="favorites">⭐ Solo Favoritos</option>
+                <option value="favorites">⭐ Favoritos</option>
+                <option value="verde">🟢 Estado Verde</option>
+                <option value="amarillo">🟡 Estado Amarillo</option>
+                <option value="rojo">🔴 Estado Rojo (Urgentes)</option>
+                <option value="sin_info">⚪ Sin Información</option>
+                <option value="inactivos">⚫ Inactivos</option>
               </select>
             </div>
 
@@ -277,23 +286,72 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
         {loading ? (
           <div style={{ padding: '30px' }}>Cargando lista de miembros...</div>
         ) : (
-          <MemberTable
-            members={sortedMembers}
-            onSelectMember={onSelectMember}
-            onToggleFavorite={handleToggleFavorite}
-            onEditMember={handleEditMember}
-            onDeleteMember={(member) => setMemberToDelete(member)}
-            onQuickUpdateStatus={handleQuickUpdateStatus}
-            userRole={user?.role}
-          />
-        )}
+          <>
+            <MemberTable
+              members={paginatedMembers}
+              onSelectMember={onSelectMember}
+              onToggleFavorite={handleToggleFavorite}
+              onEditMember={handleEditMember}
+              onDeleteMember={(member) => setMemberToDelete(member)}
+              onQuickUpdateStatus={handleQuickUpdateStatus}
+              userRole={user?.role}
+            />
 
-        {/* Paginador */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '20px' }}>
-          <button className="btn btn-secondary" style={{ padding: '6px 10px' }}><ChevronLeft size={16} /></button>
-          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--primary)', padding: '6px 12px', background: 'var(--primary-light)', borderRadius: '6px' }}>1</span>
-          <button className="btn btn-secondary" style={{ padding: '6px 10px' }}><ChevronRight size={16} /></button>
-        </div>
+            {/* Controles de Paginación */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: '20px',
+              padding: '12px 16px',
+              background: 'var(--card-bg, #ffffff)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '12px',
+              fontSize: '0.85rem',
+              color: 'var(--text-muted)',
+              flexWrap: 'wrap',
+              gap: '10px'
+            }}>
+              <span>
+                Mostrando <strong>{paginatedMembers.length > 0 ? (validCurrentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</strong> a <strong>{Math.min(validCurrentPage * ITEMS_PER_PAGE, sortedMembers.length)}</strong> de <strong>{sortedMembers.length}</strong> miembros registrados
+              </span>
+
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                  disabled={validCurrentPage === 1}
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                >
+                  <ChevronLeft size={16} /> Anterior
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    className={`btn ${pageNum === validCurrentPage ? 'btn-primary' : 'btn-secondary'}`}
+                    style={{ padding: '6px 12px', fontSize: '0.8rem', minWidth: '32px', justifyContent: 'center' }}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                  disabled={validCurrentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                >
+                  Siguiente <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       <MemberModal

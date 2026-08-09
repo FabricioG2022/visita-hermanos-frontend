@@ -70,20 +70,6 @@ export const api = {
     return res.json();
   },
 
-  register: async (name, email, password) => {
-    const res = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Error al registrar usuario');
-    }
-    clearClientCache();
-    return res.json();
-  },
-
   forgotPassword: async (email) => {
     const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
       method: 'POST',
@@ -119,7 +105,34 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.message || 'Error al invitar usuario');
+      throw new Error(err.message || 'Error al registrar usuario');
+    }
+    clearClientCache('users_list');
+    return res.json();
+  },
+
+  deleteUser: async (userId) => {
+    const res = await fetch(`${API_BASE_URL}/auth/users/${userId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Error al eliminar usuario');
+    }
+    clearClientCache('users_list');
+    return res.json();
+  },
+
+  toggleUserStatus: async (userId, active) => {
+    const res = await fetch(`${API_BASE_URL}/auth/users/${userId}/status`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ active })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Error al cambiar estado del usuario');
     }
     clearClientCache('users_list');
     return res.json();

@@ -6,6 +6,7 @@ import {
   MapPin,
   Calendar,
   MessageSquare,
+  BarChart3,
   BookOpen,
   Settings,
   LogOut,
@@ -15,15 +16,18 @@ import {
 export const Sidebar = ({ activeTab, setActiveTab }) => {
   const { user, logout } = useAuth();
 
-  const navItems = [
+  const allNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'members', label: 'Miembros', icon: Users },
     { id: 'visits', label: 'Visitas', icon: MapPin },
     { id: 'appointments', label: 'Citas', icon: Calendar },
     { id: 'messages', label: 'Mensajes', icon: MessageSquare },
+    { id: 'reports', label: 'Reportes', icon: BarChart3, adminOnly: true },
     { id: 'verse', label: 'Versículo del día', icon: BookOpen },
     { id: 'settings', label: 'Configuración', icon: Settings },
   ];
+
+  const navItems = allNavItems.filter(item => !item.adminOnly || user?.role === 'admin');
 
   return (
     <aside className="sidebar">

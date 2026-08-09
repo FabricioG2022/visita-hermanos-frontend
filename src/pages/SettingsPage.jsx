@@ -4,10 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { api } from '../services/api';
 import { SuccessModal } from '../components/SuccessModal';
+import { ConfirmModal } from '../components/ConfirmModal';
 import { 
   Users, 
   ShieldCheck, 
   UserPlus, 
+  UserX,
+  UserCheck,
   Settings as SettingsIcon, 
   Bell, 
   User, 
@@ -18,13 +21,22 @@ import {
   Check, 
   Lock, 
   Save, 
-  Globe 
+  Globe,
+  Ban
 } from 'lucide-react';
 
 export const SettingsPage = () => {
   const { user, updateUserProfile } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
-  const [activeTab, setActiveTab] = useState('users');
+
+  const isAdmin = user?.role === 'admin';
+  const [activeTab, setActiveTab] = useState(isAdmin ? 'users' : 'params');
+
+  useEffect(() => {
+    if (!isAdmin && activeTab === 'users') {
+      setActiveTab('params');
+    }
+  }, [isAdmin, activeTab]);
 
   // Estado para Modal de Feedback estilizado
   const [modalFeedback, setModalFeedback] = useState({ isOpen: false, title: '', message: '' });
@@ -34,6 +46,7 @@ export const SettingsPage = () => {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({ name: '', email: '', password: '', role: 'visitador' });
+  const [userToDelete, setUserToDelete] = useState(null);
 
   // Sección B: Parámetros Citas & Visitas
   const [visitTypes, setVisitTypes] = useState([
@@ -148,16 +161,56 @@ export const SettingsPage = () => {
       setIsInviteModalOpen(false);
       setModalFeedback({
         isOpen: true,
-        title: '¡Usuario Invitado!',
-        message: `El usuario ${inviteForm.name} ha sido registrado correctamente.`
+        title: '¡Usuario Registrado!',
+        message: `El usuario ${inviteForm.name} ha sido dado de alta exitosamente en la plataforma.`
       });
       setInviteForm({ name: '', email: '', password: '', role: 'visitador' });
       fetchUsers();
     } catch (err) {
       setModalFeedback({
         isOpen: true,
-        title: 'Error al invitar',
-        message: err.message || 'Error al invitar usuario'
+        title: 'Error al dar de alta',
+        message: err.message || 'Error al registrar usuario'
+      });
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    try {
+      await api.deleteUser(userToDelete.id || userToDelete.uid);
+      setModalFeedback({
+        isOpen: true,
+        title: 'Usuario Dado de Baja',
+        message: `El usuario ${userToDelete.name || userToDelete.email} ha sido eliminado del sistema con éxito.`
+      });
+      setUserToDelete(null);
+      fetchUsers();
+    } catch (err) {
+      setModalFeedback({
+        isOpen: true,
+        title: 'Error al dar de baja',
+        message: err.message || 'No se pudo eliminar el usuario'
+      });
+      setUserToDelete(null);
+    }
+  };
+
+  const handleToggleUserStatus = async (targetUser) => {
+    const nextStatus = !(targetUser.active !== false);
+    try {
+      await api.toggleUserStatus(targetUser.id || targetUser.uid, nextStatus);
+      setModalFeedback({
+        isOpen: true,
+        title: nextStatus ? '¡Usuario Activado!' : '¡Usuario Inhabilitado!',
+        message: `El acceso para ${targetUser.name || targetUser.email} ha sido ${nextStatus ? 'activado' : 'inhabilitado temporalmente'}.`
+      });
+      fetchUsers();
+    } catch (err) {
+      setModalFeedback({
+        isOpen: true,
+        title: 'Error al modificar estado',
+        message: err.message || 'No se pudo actualizar el estado del usuario'
       });
     }
   };
@@ -251,153 +304,177 @@ export const SettingsPage = () => {
 
         {/* Pestañas Principales de Configuración */}
         <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-          <button
-            className={`btn ${activeTab === 'users' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setActiveTab('users')}
-          >
-            <Users size={18} /> A. Gestión de Usuarios y Permisos
-          </button>
+          {isAdmin && (
+            <button
+              className={`btn ${activeTab === 'users' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setActiveTab('users')}
+            >
+              <Users size={18} /> A. Gestión de Usuarios y Permisos
+            </button>
+          )}
 
           <button
             className={`btn ${activeTab === 'params' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('params')}
           >
-            <SettingsIcon size={18} /> B. Parámetros de Citas y Visitas
+            <SettingsIcon size={18} /> {isAdmin ? 'B.' : '1.'} Parámetros de Citas y Visitas
           </button>
 
           <button
             className={`btn ${activeTab === 'notifications' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('notifications')}
           >
-            <Bell size={18} /> C. Notificaciones y Mensajería
+            <Bell size={18} /> {isAdmin ? 'C.' : '2.'} Notificaciones y Mensajería
           </button>
 
           <button
             className={`btn ${activeTab === 'profile' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('profile')}
           >
-            <User size={18} /> D. Ajustes Generales y Mi Perfil
+            <User size={18} /> {isAdmin ? 'D.' : '3.'} Ajustes Generales y Mi Perfil
           </button>
         </div>
 
         {/* ========================================================================= */}
-        {/* SECCIÓN A: GESTIÓN DE USUARIOS Y PERMISOS (SOLO ADMIN) */}
+        {/* SECCIÓN A: GESTIÓN DE USUARIOS Y PERMISOS (EXCLUSIVO PASTOR / ADMIN) */}
         {/* ========================================================================= */}
-        {activeTab === 'users' && (
+        {isAdmin && activeTab === 'users' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {user?.role !== 'admin' ? (
-              <div className="dashboard-card" style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                <ShieldCheck size={40} color="var(--primary)" style={{ marginBottom: '12px' }} />
-                <h3>Sección Restringida a Administradores</h3>
-                <p style={{ marginTop: '8px', fontSize: '0.9rem' }}>
-                  Solo los usuarios con rol de Administrador pueden ver la lista de colaboradores y ajustar permisos.
-                </p>
+            {/* 1. Lista de Colaboradores */}
+            <div className="dashboard-card">
+              <div className="card-header">
+                <div>
+                  <h3 className="card-title">Usuarios Autorizados del Sistema</h3>
+                  <p className="page-subtitle">Gestión exclusiva pastoral de cuentas con acceso a la plataforma (Administradores y Visitadores)</p>
+                </div>
+
+                <button className="btn btn-primary" onClick={() => setIsInviteModalOpen(true)}>
+                  <UserPlus size={18} /> Dar de Alta Usuario
+                </button>
               </div>
-            ) : (
-              <>
-                {/* 1. Lista de Colaboradores */}
-                <div className="dashboard-card">
-                  <div className="card-header">
-                    <div>
-                      <h3 className="card-title">Usuarios del Sistema</h3>
-                      <p className="page-subtitle">Lista de colaboradores con acceso a la plataforma (Administradores y Visitadores)</p>
-                    </div>
 
-                    <button className="btn btn-primary" onClick={() => setIsInviteModalOpen(true)}>
-                      <UserPlus size={18} /> Invitar nuevo usuario
-                    </button>
-                  </div>
+              {loadingUsers ? (
+                <p style={{ color: 'var(--text-muted)', padding: '16px' }}>Cargando usuarios...</p>
+              ) : (
+                <div className="table-card">
+                  <table className="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Usuario</th>
+                        <th>Correo Electrónico</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th style={{ textAlign: 'center' }}>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {usersList.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
+                            No se encontraron colaboradores registrados.
+                          </td>
+                        </tr>
+                      ) : (
+                        usersList.map((u) => {
+                          const userId = u.id || u.uid;
+                          const isSelf = userId === user?.id || u.email === user?.email;
+                          return (
+                            <tr key={userId}>
+                              <td>
+                                <div className="member-cell">
+                                  <div className="avatar-circle">
+                                    {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                                  </div>
+                                  <div>{u.name || 'Usuario'}</div>
+                                </div>
+                              </td>
+                              <td>{u.email}</td>
+                              <td>
+                                <span className={`badge-status ${u.role === 'admin' ? 'badge-verde' : 'badge-active'}`}>
+                                  {u.role === 'admin' ? 'Administrador' : 'Visitador'}
+                                </span>
+                              </td>
+                              <td>
+                                {u.active !== false ? (
+                                  <span className="badge-status badge-active">Activo</span>
+                                ) : (
+                                  <span className="badge-status" style={{ background: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5' }}>Inhabilitado</span>
+                                )}
+                              </td>
+                              <td style={{ textAlign: 'center' }}>
+                                {!isSelf ? (
+                                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                    <button
+                                      className="star-btn"
+                                      title={u.active !== false ? "Inhabilitar acceso del usuario" : "Reactivar acceso del usuario"}
+                                      style={{ padding: '6px', borderRadius: '6px', cursor: 'pointer', background: u.active !== false ? '#fef3c7' : '#dcfce7' }}
+                                      onClick={() => handleToggleUserStatus(u)}
+                                    >
+                                      {u.active !== false ? <UserX size={16} color="#d97706" /> : <UserCheck size={16} color="#16a34a" />}
+                                    </button>
 
-                  {loadingUsers ? (
-                    <p style={{ color: 'var(--text-muted)', padding: '16px' }}>Cargando colaboradores...</p>
-                  ) : (
-                    <div className="table-card">
-                      <table className="custom-table">
-                        <thead>
-                          <tr>
-                            <th>Usuario</th>
-                            <th>Correo Electrónico</th>
-                            <th>Rol</th>
-                            <th>Estado</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {usersList.length === 0 ? (
-                            <tr>
-                              <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
-                                No se encontraron colaboradores registrados.
+                                    <button
+                                      className="star-btn"
+                                      title="Dar de baja definitiva"
+                                      style={{ padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                      onClick={() => setUserToDelete(u)}
+                                    >
+                                      <Trash2 size={16} color="#dc2626" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Tu cuenta</span>
+                                )}
                               </td>
                             </tr>
-                          ) : (
-                            usersList.map((u) => (
-                              <tr key={u.id || u.uid}>
-                                <td>
-                                  <div className="member-cell">
-                                    <div className="avatar-circle">
-                                      {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
-                                    </div>
-                                    <div>{u.name || 'Usuario'}</div>
-                                  </div>
-                                </td>
-                                <td>{u.email}</td>
-                                <td>
-                                  <span className={`badge-status ${u.role === 'admin' ? 'badge-verde' : 'badge-active'}`}>
-                                    {u.role === 'admin' ? 'Administrador' : 'Visitador'}
-                                  </span>
-                                </td>
-                                <td>
-                                  <span className="badge-status badge-active">Activo</span>
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
                 </div>
+              )}
+            </div>
 
-                {/* 2. Matriz de Roles y Permisos */}
-                <div className="dashboard-card">
-                  <h3 className="card-title" style={{ marginBottom: '14px' }}>Matriz de Roles y Permisos</h3>
-                  <p className="page-subtitle" style={{ marginBottom: '20px' }}>Definición de alcance y capacidades por tipo de rol en el sistema</p>
+            {/* 2. Matriz de Roles y Permisos */}
+            <div className="dashboard-card">
+              <h3 className="card-title" style={{ marginBottom: '14px' }}>Matriz de Roles y Permisos</h3>
+              <p className="page-subtitle" style={{ marginBottom: '20px' }}>Definición de alcance y capacidades por tipo de rol en el sistema</p>
 
-                  <div className="table-card">
-                    <table className="custom-table">
-                      <thead>
-                        <tr>
-                          <th>Módulo / Funcionalidad</th>
-                          <th>Administrador</th>
-                          <th>Visitador</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td><strong>Gestión de Miembros (Crear/Editar/Eliminar)</strong></td>
-                          <td><Check color="#16a34a" size={20} /> Total</td>
-                          <td><Check color="#16a34a" size={20} /> Solo lectura / Edición limitada</td>
-                        </tr>
-                        <tr>
-                          <td><strong>Historial de Visitas de Campo</strong></td>
-                          <td><Check color="#16a34a" size={20} /> Registrar y Consultar Todo</td>
-                          <td><Check color="#16a34a" size={20} /> Registrar y Consultar Sus Visitas</td>
-                        </tr>
-                        <tr>
-                          <td><strong>Programación de Citas</strong></td>
-                          <td><Check color="#16a34a" size={20} /> Crear y Reasignar a cualquiera</td>
-                          <td><Check color="#16a34a" size={20} /> Ver sus citas asignadas</td>
-                        </tr>
-                        <tr>
-                          <td><strong>Gestión de Usuarios y Configuración</strong></td>
-                          <td><Check color="#16a34a" size={20} /> Acceso Exclusivo</td>
-                          <td><span style={{ color: '#dc2626', fontWeight: 600 }}>Sin Acceso</span></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
+              <div className="table-card">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Módulo / Funcionalidad</th>
+                      <th>Administrador</th>
+                      <th>Visitador</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Gestión de Miembros (Crear/Editar/Eliminar)</strong></td>
+                      <td><Check color="#16a34a" size={20} /> Total</td>
+                      <td><Check color="#16a34a" size={20} /> Solo lectura / Edición limitada</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Historial de Visitas de Campo</strong></td>
+                      <td><Check color="#16a34a" size={20} /> Registrar y Consultar Todo</td>
+                      <td><Check color="#16a34a" size={20} /> Registrar y Consultar Sus Visitas</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Programación de Citas</strong></td>
+                      <td><Check color="#16a34a" size={20} /> Crear y Reasignar a cualquiera</td>
+                      <td><Check color="#16a34a" size={20} /> Ver sus citas asignadas</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Gestión de Usuarios y Configuración</strong></td>
+                      <td><Check color="#16a34a" size={20} /> Acceso Exclusivo</td>
+                      <td><span style={{ color: '#dc2626', fontWeight: 600 }}>Sin Acceso</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 
@@ -580,12 +657,26 @@ export const SettingsPage = () => {
               <p className="page-subtitle" style={{ marginBottom: '20px' }}>Información del grupo y zona horaria</p>
 
               <div className="form-group">
-                <label>Nombre del Grupo / Organización</label>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                  <label style={{ margin: 0 }}>Nombre del Grupo / Organización</label>
+                  {!isAdmin && (
+                    <span style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Ban size={14} color="#dc2626" /> Solo Administrador
+                    </span>
+                  )}
+                </div>
                 <input
                   type="text"
                   className="form-control"
+                  disabled={!isAdmin}
+                  title={!isAdmin ? "Solo el Administrador / Pastor puede modificar el nombre de la organización" : ""}
+                  style={{
+                    cursor: !isAdmin ? 'not-allowed' : 'text',
+                    backgroundColor: !isAdmin ? 'var(--bg-main, #f1f5f9)' : undefined,
+                    opacity: !isAdmin ? 0.75 : 1
+                  }}
                   value={orgData.name}
-                  onChange={(e) => setOrgData({ ...orgData, name: e.target.value })}
+                  onChange={(e) => isAdmin && setOrgData({ ...orgData, name: e.target.value })}
                 />
               </div>
 
@@ -685,12 +776,12 @@ export const SettingsPage = () => {
 
       </div>
 
-      {/* MODAL PARA INVITAR NUEVO USUARIO (SECCIÓN A) */}
+      {/* MODAL PARA DAR DE ALTA NUEVO USUARIO (PASTOR / ADMIN) */}
       {isInviteModalOpen && (
         <div className="modal-overlay">
           <div className="modal-card">
             <div className="modal-header">
-              <h2 className="modal-title">Invitar Nuevo Usuario</h2>
+              <h2 className="modal-title">Dar de Alta Nuevo Usuario</h2>
               <button className="star-btn" onClick={() => setIsInviteModalOpen(false)}>✕</button>
             </div>
 
@@ -726,7 +817,7 @@ export const SettingsPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Contraseña Temporal (mínimo 6 caracteres) *</label>
+                <label>Contraseña Inicial (mínimo 6 caracteres) *</label>
                 <input
                   type="password"
                   required
@@ -749,7 +840,7 @@ export const SettingsPage = () => {
                   onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
                 >
                   <option value="visitador">Visitador (Acceso a visitas y miembros asignados)</option>
-                  <option value="admin">Administrador (Acceso total al sistema)</option>
+                  <option value="admin">Administrador / Pastor (Acceso total al sistema)</option>
                 </select>
               </div>
 
@@ -758,13 +849,24 @@ export const SettingsPage = () => {
                   Cancelar
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  Enviar Invitación / Crear Usuario
+                  Dar de Alta Usuario
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* MODAL DE CONFIRMACIÓN DE BAJA DE USUARIO */}
+      <ConfirmModal
+        isOpen={!!userToDelete}
+        onClose={() => setUserToDelete(null)}
+        onConfirm={handleDeleteUser}
+        title="¿Dar de baja a este usuario?"
+        message={`¿Estás seguro de que deseas revocar el acceso a ${userToDelete?.name || userToDelete?.email}? El usuario no podrá volver a ingresar a la plataforma.`}
+        confirmText="Sí, dar de baja"
+        cancelText="Cancelar"
+      />
 
       {/* MODAL DE FEEDBACK Y CONFIRMACIÓN */}
       <SuccessModal
