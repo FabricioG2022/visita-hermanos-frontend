@@ -177,6 +177,18 @@ export const SettingsPage = () => {
 
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
+
+    const isSuperAdminTarget = (userToDelete.email && userToDelete.email.toLowerCase() === 'fabrigo2015@gmail.com') || userToDelete.role === 'superadmin' || userToDelete.role === 'SUPER_ADMIN';
+    if (isSuperAdminTarget) {
+      setModalFeedback({
+        isOpen: true,
+        title: 'Acción No Permitida',
+        message: 'No se puede eliminar la cuenta principal de soporte del sistema (SuperAdmin).'
+      });
+      setUserToDelete(null);
+      return;
+    }
+
     try {
       await api.deleteUser(userToDelete.id || userToDelete.uid);
       setModalFeedback({
@@ -197,6 +209,16 @@ export const SettingsPage = () => {
   };
 
   const handleToggleUserStatus = async (targetUser) => {
+    const isSuperAdminTarget = (targetUser.email && targetUser.email.toLowerCase() === 'fabrigo2015@gmail.com') || targetUser.role === 'superadmin' || targetUser.role === 'SUPER_ADMIN';
+    if (isSuperAdminTarget) {
+      setModalFeedback({
+        isOpen: true,
+        title: 'Acción No Permitida',
+        message: 'No se puede inhabilitar la cuenta principal de soporte del sistema (SuperAdmin).'
+      });
+      return;
+    }
+
     const nextStatus = !(targetUser.active !== false);
     try {
       await api.toggleUserStatus(targetUser.id || targetUser.uid, nextStatus);
@@ -378,21 +400,36 @@ export const SettingsPage = () => {
                         usersList.map((u) => {
                           const userId = u.id || u.uid;
                           const isSelf = userId === user?.id || u.email === user?.email;
+                          const isSuperAdmin = (u.email && u.email.toLowerCase() === 'fabrigo2015@gmail.com') || u.role === 'superadmin' || u.role === 'SUPER_ADMIN';
+
                           return (
                             <tr key={userId}>
                               <td>
                                 <div className="member-cell">
-                                  <div className="avatar-circle">
+                                  <div className="avatar-circle" style={isSuperAdmin ? { background: '#4338ca', color: '#ffffff' } : {}}>
                                     {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
                                   </div>
-                                  <div>{u.name || 'Usuario'}</div>
+                                  <div>
+                                    {u.name || 'Usuario'}
+                                    {isSuperAdmin && (
+                                      <span style={{ fontSize: '0.7rem', color: '#4338ca', marginLeft: '6px', fontWeight: 700 }}>
+                                        (Principal)
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </td>
                               <td>{u.email}</td>
                               <td>
-                                <span className={`badge-status ${u.role === 'admin' ? 'badge-verde' : 'badge-active'}`}>
-                                  {u.role === 'admin' ? 'Administrador' : 'Visitador'}
-                                </span>
+                                {isSuperAdmin ? (
+                                  <span className="badge-status" style={{ background: '#e0e7ff', color: '#3730a3', borderColor: '#c7d2fe', fontWeight: 700 }}>
+                                    SuperAdmin / Soporte
+                                  </span>
+                                ) : (
+                                  <span className={`badge-status ${u.role === 'admin' ? 'badge-verde' : 'badge-active'}`}>
+                                    {u.role === 'admin' ? 'Administrador' : 'Visitador'}
+                                  </span>
+                                )}
                               </td>
                               <td>
                                 {u.active !== false ? (
@@ -402,7 +439,13 @@ export const SettingsPage = () => {
                                 )}
                               </td>
                               <td style={{ textAlign: 'center' }}>
-                                {!isSelf ? (
+                                {isSuperAdmin ? (
+                                  <span style={{ fontSize: '0.75rem', color: '#4338ca', fontWeight: 700, fontStyle: 'italic', background: '#e0e7ff', padding: '4px 8px', borderRadius: '6px' }}>
+                                    🔒 Protegido (Soporte)
+                                  </span>
+                                ) : isSelf ? (
+                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Tu cuenta</span>
+                                ) : (
                                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                     <button
                                       className="star-btn"
@@ -422,8 +465,6 @@ export const SettingsPage = () => {
                                       <Trash2 size={16} color="#dc2626" />
                                     </button>
                                   </div>
-                                ) : (
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Tu cuenta</span>
                                 )}
                               </td>
                             </tr>

@@ -61,6 +61,7 @@ export const MessagesPage = ({ onSelectMember }) => {
   const [appointments, setAppointments] = useState([]);
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [selectedTemplateKey, setSelectedTemplateKey] = useState('coordinar');
+  const [customText, setCustomText] = useState('');
   const [contactLogs, setContactLogs] = useState([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
 
@@ -263,7 +264,7 @@ export const MessagesPage = ({ onSelectMember }) => {
     let text = selectedTemplateKey === 'personalizado' ? customText : (tmpl ? tmpl.body : '');
 
     const selectedMember = members.find(m => String(m.id) === String(selectedMemberId));
-    const memberName = selectedMember ? selectedMember.name : 'Hermano/a';
+    const memberName = selectedMember ? (selectedMember.name || selectedMember.nombre || 'Hermano/a') : 'Hermano/a';
     
     // Buscar si el miembro tiene alguna cita agendada
     const memberAppt = appointments.find(a => String(a.memberId) === String(selectedMemberId));
@@ -289,7 +290,16 @@ export const MessagesPage = ({ onSelectMember }) => {
     }
 
     const messageText = getRenderedMessage();
-    const cleanPhone = (selectedMember.phone || '').replace(/[^0-9]/g, '');
+    if (!messageText || !messageText.trim()) {
+      setModalFeedback({
+        isOpen: true,
+        title: 'Mensaje vacío',
+        message: 'Por favor escribe el contenido de tu mensaje personalizado o selecciona una plantilla.'
+      });
+      return;
+    }
+
+    const cleanPhone = (selectedMember.phone || selectedMember.telefono || '').replace(/[^0-9]/g, '');
     const email = selectedMember.email || '';
 
     // Guardar en Historial de Contactos
