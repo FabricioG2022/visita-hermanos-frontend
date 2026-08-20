@@ -182,7 +182,8 @@ export const VisitsPage = ({ onSelectMember }) => {
           </div>
         ) : (
           <>
-            <div className="table-card">
+            {/* Vista de Tabla para Escritorio */}
+            <div className="table-card desktop-only-table">
               <table className="custom-table">
                 <thead>
                   <tr>
@@ -263,6 +264,76 @@ export const VisitsPage = ({ onSelectMember }) => {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Vista de Tarjetas para Celulares */}
+            <div className="mobile-only-cards">
+              {paginatedVisits.map((v) => {
+                const statusClass = 
+                  v.status?.toLowerCase() === 'verde' ? 'badge-verde' :
+                  v.status?.toLowerCase() === 'amarillo' ? 'badge-amarillo' :
+                  v.status?.toLowerCase() === 'rojo' ? 'badge-rojo' : 'badge-active';
+
+                return (
+                  <div key={v.id} className="mobile-record-card">
+                    <div className="mobile-card-header">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {v.fotoUrl ? (
+                          <img
+                            src={v.fotoUrl}
+                            alt={v.memberName}
+                            style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <div className="avatar-circle">
+                            {v.memberName ? v.memberName.charAt(0) : '?'}
+                          </div>
+                        )}
+                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-dark)' }}>
+                          {v.memberName || 'Miembro General'}
+                        </div>
+                      </div>
+
+                      <span className={`badge-status ${statusClass}`}>
+                        {v.status || 'Realizada'}
+                      </span>
+                    </div>
+
+                    <div className="mobile-card-body">
+                      <div className="mobile-card-row">
+                        <span className="mobile-card-label">Fecha y Hora:</span>
+                        <span className="mobile-card-value">
+                          📅 {v.date || 'N/A'} {v.time ? `(${v.time})` : ''}
+                        </span>
+                      </div>
+
+                      <div className="mobile-card-row">
+                        <span className="mobile-card-label">Visitador:</span>
+                        <span className="mobile-card-value">
+                          👤 {v.responsible || 'Voluntario'}
+                        </span>
+                      </div>
+
+                      <div className="mobile-card-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                        <span className="mobile-card-label">Resumen de Visita:</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-dark)', lineHeight: '1.4', fontStyle: 'italic' }}>
+                          "{v.summary || 'Sin nota de visita.'}"
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mobile-card-actions">
+                      <button
+                        className="btn btn-primary"
+                        style={{ padding: '6px 14px', fontSize: '0.8rem', width: '100%', justifyContent: 'center' }}
+                        onClick={() => handleMemberClick(v)}
+                      >
+                        Ver perfil <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Controles de Paginación */}

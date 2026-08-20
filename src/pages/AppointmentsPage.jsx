@@ -135,7 +135,8 @@ export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appoin
           </div>
         ) : (
           <>
-            <div className="table-card">
+            {/* Vista de Tabla para Escritorio */}
+            <div className="table-card desktop-only-table">
               <table className="custom-table">
                 <thead>
                   <tr>
@@ -231,6 +232,80 @@ export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appoin
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Vista de Tarjetas para Celulares */}
+            <div className="mobile-only-cards">
+              {paginatedAppointments.map(a => {
+                const statusLower = (a.status || 'pendiente').toLowerCase();
+                const badgeClass = 
+                  statusLower === 'realizada' ? 'badge-verde' :
+                  statusLower === 'cancelada' ? 'badge-rojo' : 'badge-amarillo';
+
+                return (
+                  <div key={a.id} className="mobile-record-card">
+                    <div className="mobile-card-header">
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-dark)' }}>
+                        {a.memberName || 'Miembro General'}
+                      </div>
+                      <span className={`badge-status ${badgeClass}`}>
+                        {a.status || 'Pendiente'}
+                      </span>
+                    </div>
+
+                    <div className="mobile-card-body">
+                      <div className="mobile-card-row">
+                        <span className="mobile-card-label">Fecha y Hora:</span>
+                        <span className="mobile-card-value">
+                          📅 {a.date} ({a.time} hs)
+                        </span>
+                      </div>
+
+                      <div className="mobile-card-row">
+                        <span className="mobile-card-label">Visitador / Resp:</span>
+                        <span className="mobile-card-value">
+                          👤 {a.responsible || 'Coordinador'}
+                        </span>
+                      </div>
+
+                      <div className="mobile-card-row">
+                        <span className="mobile-card-label">Tipo y Lugar:</span>
+                        <span className="mobile-card-value">
+                          📍 {a.visitType || 'Visita'} - {a.location || 'Domicilio'}
+                        </span>
+                      </div>
+
+                      <div className="mobile-card-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                        <span className="mobile-card-label">Observaciones:</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-dark)', lineHeight: '1.4', fontStyle: 'italic' }}>
+                          "{a.observations || 'Sin observaciones.'}"
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mobile-card-actions">
+                      {statusLower !== 'realizada' && (
+                        <button
+                          className="btn btn-secondary"
+                          style={{ padding: '6px 12px', fontSize: '0.8rem', color: '#16a34a', flex: 1, justifyContent: 'center' }}
+                          onClick={() => handleUpdateStatus(a.id, 'Realizada')}
+                        >
+                          <CheckCircle size={15} /> Realizada
+                        </button>
+                      )}
+                      {statusLower !== 'cancelada' && (
+                        <button
+                          className="btn btn-secondary"
+                          style={{ padding: '6px 12px', fontSize: '0.8rem', color: '#dc2626', flex: 1, justifyContent: 'center' }}
+                          onClick={() => handleUpdateStatus(a.id, 'Cancelada')}
+                        >
+                          <XCircle size={15} /> Cancelar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Controles de Paginación */}

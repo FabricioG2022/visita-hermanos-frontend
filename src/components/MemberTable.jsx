@@ -33,27 +33,30 @@ export const getBadgeClass = (st) => {
 };
 
 export const MemberTable = ({ members, onSelectMember, onToggleFavorite, onEditMember, onDeleteMember, onQuickUpdateStatus, userRole }) => {
+  if (members.length === 0) {
+    return (
+      <div className="table-card" style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
+        No se encontraron miembros.
+      </div>
+    );
+  }
+
   return (
-    <div className="table-card">
-      <table className="custom-table">
-        <thead>
-          <tr>
-            <th>Miembro</th>
-            <th>Teléfono</th>
-            <th>Última Visita</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {members.length === 0 ? (
+    <>
+      {/* Vista de Tabla para Escritorio / Tablet */}
+      <div className="table-card desktop-only-table">
+        <table className="custom-table">
+          <thead>
             <tr>
-              <td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
-                No se encontraron miembros.
-              </td>
+              <th>Miembro</th>
+              <th>Teléfono</th>
+              <th>Última Visita</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
-          ) : (
-            members.map((member) => {
+          </thead>
+          <tbody>
+            {members.map((member) => {
               const badgeClass = getBadgeClass(member.status);
               const isOutdated = isOlderThan6Months(member.lastVisit) && (member.status || '').toLowerCase() !== 'inactivo';
 
@@ -163,10 +166,123 @@ export const MemberTable = ({ members, onSelectMember, onToggleFavorite, onEditM
                   </td>
                 </tr>
               );
-            })
-          )}
-        </tbody>
-      </table>
-    </div>
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Vista de Tarjetas Verticales para Celulares */}
+      <div className="mobile-only-cards">
+        {members.map((member) => {
+          const badgeClass = getBadgeClass(member.status);
+          const isOutdated = isOlderThan6Months(member.lastVisit) && (member.status || '').toLowerCase() !== 'inactivo';
+          const cleanPhone = (member.phone || '').replace(/[^0-9]/g, '');
+
+          return (
+            <div key={member.id} className="mobile-record-card">
+              <div className="mobile-card-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {member.fotoUrl ? (
+                    <img 
+                      src={member.fotoUrl} 
+                      alt={member.name} 
+                      style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <div className="avatar-circle">
+                      {member.name ? member.name.charAt(0) : '?'}
+                    </div>
+                  )}
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-dark)' }}>{member.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{member.email || 'Sin correo'}</div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button
+                    className={`star-btn ${member.isFavorite ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleFavorite(member.id);
+                    }}
+                  >
+                    <Star size={18} fill={member.isFavorite ? 'currentColor' : 'none'} />
+                  </button>
+                  <span className={`badge-status ${badgeClass}`}>
+                    {member.status || 'Sin info'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mobile-card-body">
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Teléfono:</span>
+                  <span className="mobile-card-value">
+                    {cleanPhone ? (
+                      <a href={`tel:${cleanPhone}`} style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+                        📞 {member.phone}
+                      </a>
+                    ) : (
+                      'Sin teléfono'
+                    )}
+                  </span>
+                </div>
+
+                <div className="mobile-card-row">
+                  <span className="mobile-card-label">Última Visita:</span>
+                  <div className="mobile-card-value">
+                    <span>{member.lastVisit || 'Sin visitas'}</span>
+                    {isOutdated && (
+                      <div style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 600, marginTop: '2px' }}>
+                        ⚠️ +6 meses sin contacto
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mobile-card-actions">
+                <button
+                  className="btn btn-primary"
+                  style={{ padding: '6px 14px', fontSize: '0.8rem', flex: 1, justifyContent: 'center' }}
+                  onClick={() => onSelectMember(member)}
+                >
+                  Ver Perfil <ChevronRight size={14} />
+                </button>
+
+                {userRole === 'admin' && (
+                  <button
+                    className="btn btn-secondary"
+                    style={{ padding: '6px 10px', fontSize: '0.8rem' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditMember(member);
+                    }}
+                    title="Editar miembro"
+                  >
+                    <Pencil size={15} color="var(--primary)" />
+                  </button>
+                )}
+
+                {userRole === 'admin' && (
+                  <button
+                    className="btn btn-secondary"
+                    style={{ padding: '6px 10px', fontSize: '0.8rem', color: '#dc2626' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteMember(member);
+                    }}
+                    title="Eliminar miembro"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 };
