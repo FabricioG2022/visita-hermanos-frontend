@@ -199,7 +199,7 @@ export const MemberProfilePage = ({ member, onBack, onScheduleAppointment, onEdi
 
       <div className="page-container">
         <div className="dashboard-card" style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '30px' }}>
+          <div className="profile-grid-wrapper">
             
             {/* Información personal del miembro */}
             <div style={{ display: 'flex', gap: '20px' }}>

@@ -2,7 +2,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://visita-hermanos-ba
 
 // Simple caché en memoria del cliente (browser) para acelerar navegación (0ms)
 const clientCache = new Map();
-const CLIENT_CACHE_TTL = 30 * 1000; // 30 segundos de caché en cliente
+const CLIENT_CACHE_TTL = 60 * 1000; // 60 segundos de caché para navegación instantánea (0ms)
 
 const getCachedData = (key) => {
   const item = clientCache.get(key);
@@ -30,7 +30,7 @@ const clearClientCache = (...prefixKeys) => {
   }
 };
 
-const fetchWithTimeout = async (url, options = {}, timeoutMs = 3000) => {
+const fetchWithTimeout = async (url, options = {}, timeoutMs = 15000) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -279,7 +279,7 @@ export const api = {
     try {
       const res = await fetchWithTimeout(`${API_BASE_URL}/appointments`, {
         headers: getAuthHeaders()
-      }, 2500);
+      }, 15000);
       if (!res.ok) throw new Error('Error al cargar citas');
       const data = await res.json();
       setCachedData(cacheKey, data);
@@ -295,7 +295,7 @@ export const api = {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(appointmentData)
-    }, 4000);
+    }, 15000);
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.message || 'Error al programar cita');
@@ -489,7 +489,7 @@ export const api = {
     try {
       const res = await fetchWithTimeout(`${API_BASE_URL}/settings`, {
         headers: getAuthHeaders()
-      }, 2000);
+      }, 15000);
       if (!res.ok) throw new Error('Error al obtener configuración del sistema');
       const data = await res.json();
       setCachedData(cacheKey, data);
@@ -505,7 +505,7 @@ export const api = {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(settingsData)
-    }, 4000);
+    }, 15000);
     if (!res.ok) {
       const err = await res.json();
       throw new Error(err.message || 'Error al guardar configuración');

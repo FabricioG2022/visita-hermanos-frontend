@@ -48,14 +48,19 @@ export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToV
         if (Array.isArray(visitsData) && visitsData.length > 0) {
           rawVisits = visitsData.map(v => ({
             id: v.id,
+            memberId: v.memberId || v.member_id || v.id,
             name: v.memberName || v.name || 'Miembro',
             date: v.date || 'N/A',
             status: v.status || 'Verde',
             fotoUrl: v.fotoUrl || '',
-            responsible: v.responsible || ''
+            responsible: v.responsible || '',
+            summary: v.summary || ''
           }));
         } else if (statsData?.recentVisits && Array.isArray(statsData.recentVisits)) {
-          rawVisits = statsData.recentVisits;
+          rawVisits = statsData.recentVisits.map(v => ({
+            ...v,
+            memberId: v.memberId || v.member_id || v.id
+          }));
         }
 
         // Ordenar descendentemente por fecha (de más nuevas a más viejas)

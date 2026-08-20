@@ -123,21 +123,35 @@ const AppContent = () => {
   const handleViewRecentVisitMember = async (recentVisit) => {
     try {
       let member = null;
-      if (recentVisit.id) {
+      const targetMemberId = recentVisit.memberId || recentVisit.id;
+
+      if (targetMemberId) {
         try {
-          member = await api.getMemberById(recentVisit.id);
+          member = await api.getMemberById(targetMemberId);
         } catch (e) {
-          const allMembers = await api.getMembers();
-          member = allMembers.find(m => m.name.toLowerCase() === recentVisit.name?.toLowerCase() || m.id === recentVisit.id);
+          try {
+            const allMembers = await api.getMembers();
+            member = allMembers.find(m =>
+              String(m.id) === String(targetMemberId) ||
+              (m.name && recentVisit.name && m.name.toLowerCase().trim() === recentVisit.name.toLowerCase().trim())
+            );
+          } catch (e2) {}
         }
       }
+
       if (!member) {
         member = {
-          id: recentVisit.id,
-          name: recentVisit.name,
+          id: targetMemberId || `temp_${Date.now()}`,
+          name: recentVisit.name || recentVisit.memberName || 'Miembro',
+          phone: 'Sin teléfono registrado',
+          email: 'Sin correo registrado',
           status: recentVisit.status || 'Verde',
-          lastVisit: recentVisit.date,
-          fotoUrl: recentVisit.fotoUrl
+          lastVisit: recentVisit.date || 'Sin visitas',
+          fotoUrl: recentVisit.fotoUrl || '',
+          notes: 'Observaciones de visita registrada.',
+          historialVisitas: [
+            { fecha: recentVisit.date, visitador: recentVisit.responsible, nota: recentVisit.summary || '', nuevoEstadoAnimico: recentVisit.status }
+          ]
         };
       }
       navigateToTab('profile', member);
