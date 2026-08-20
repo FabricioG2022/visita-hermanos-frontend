@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://visita-hermanos-backend.onrender.com/api';
 
 // Simple caché en memoria del cliente (browser) para acelerar navegación (0ms)
 const clientCache = new Map();
