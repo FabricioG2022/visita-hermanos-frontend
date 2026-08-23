@@ -104,6 +104,32 @@ const AppContent = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Heartbeat automático cada 4 minutos para evitar que Render entre en reposo mientras la app está abierta
+  useEffect(() => {
+    if (!user) return;
+    
+    // Pre-calentamiento inicial
+    api.ping();
+
+    // Ping cada 4 minutos (Render se duerme a los 15 min de inactividad)
+    const intervalId = setInterval(() => {
+      api.ping();
+    }, 4 * 60 * 1000);
+
+    // Ping al volver a la pestaña si el dispositivo estuvo suspendido o inactivo
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        api.ping();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
+
   if (loading) {
     return (
       <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

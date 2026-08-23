@@ -1,31 +1,57 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://visita-hermanos-backend.onrender.com/api';
 
-// Simple caché en memoria del cliente (browser) para acelerar navegación (0ms)
+// Caché hibrida en memoria y localStorage para respuesta instantánea (0ms) incluso si el servidor está saliendo de reposo
 const clientCache = new Map();
-const CLIENT_CACHE_TTL = 60 * 1000; // 60 segundos de caché para navegación instantánea (0ms)
+const CLIENT_CACHE_TTL = 5 * 60 * 1000; // 5 minutos de caché para navegación relámpago (0ms)
 
 const getCachedData = (key) => {
+  // 1. Intentar memoria de la sesión activa
   const item = clientCache.get(key);
-  if (!item) return null;
-  if (Date.now() > item.expiresAt) {
-    clientCache.delete(key);
-    return null;
+  if (item && Date.now() <= item.expiresAt) {
+    return item.data;
   }
-  return item.data;
+
+  // 2. Fallback a localStorage para persisted cache entre recargas o inactividad
+  try {
+    const raw = localStorage.getItem(`vh_cache_${key}`);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Date.now() <= parsed.expiresAt) {
+        clientCache.set(key, parsed);
+        return parsed.data;
+      } else {
+        localStorage.removeItem(`vh_cache_${key}`);
+      }
+    }
+  } catch (e) {}
+
+  return null;
 };
 
 const setCachedData = (key, data, ttlMs = CLIENT_CACHE_TTL) => {
-  clientCache.set(key, { data, expiresAt: Date.now() + ttlMs });
+  const expiresAt = Date.now() + ttlMs;
+  clientCache.set(key, { data, expiresAt });
+  try {
+    localStorage.setItem(`vh_cache_${key}`, JSON.stringify({ data, expiresAt }));
+  } catch (e) {}
 };
 
 const clearClientCache = (...prefixKeys) => {
   if (prefixKeys.length === 0) {
     clientCache.clear();
+    try {
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('vh_cache_')) localStorage.removeItem(k);
+      });
+    } catch (e) {}
     return;
   }
   for (const k of clientCache.keys()) {
     if (prefixKeys.some(p => k.startsWith(p))) {
       clientCache.delete(k);
+      try {
+        localStorage.removeItem(`vh_cache_${k}`);
+      } catch (e) {}
     }
   }
 };
@@ -190,13 +216,19 @@ export const api = {
     if (cached) return cached;
 
     const query = search ? `?search=${encodeURIComponent(search)}` : '';
-    const res = await fetch(`${API_BASE_URL}/members${query}`, {
-      headers: getAuthHeaders()
-    });
-    if (!res.ok) throw new Error('Error al obtener la lista de miembros');
-    const data = await res.json();
-    setCachedData(cacheKey, data);
-    return data;
+    try {
+      const res = await fetchWithTimeout(`${API_BASE_URL}/members${query}`, {
+        headers: getAuthHeaders()
+      }, 15000);
+      if (!res.ok) throw new Error('Error al obtener la lista de miembros');
+      const data = await res.json();
+      setCachedData(cacheKey, data);
+      return data;
+    } catch (e) {
+      console.warn("Respuesta de fallback/caché para miembros:", e);
+      if (cached) return cached;
+      throw e;
+    }
   },
 
   getMemberById: async (id) => {
