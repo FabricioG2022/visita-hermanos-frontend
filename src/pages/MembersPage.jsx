@@ -203,7 +203,7 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
         title="Miembros"
         subtitle="Gestiona y organiza tus miembros en un solo lugar"
         actionButton={
-          user?.role === 'admin' && (
+          (user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'SUPER_ADMIN') && (
             <button
               className="btn btn-primary"
               onClick={() => {

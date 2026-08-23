@@ -266,7 +266,7 @@ const AppContent = () => {
         )}
 
         {activeTab === 'reports' && (
-          user?.role === 'admin' ? (
+          (user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'SUPER_ADMIN') ? (
             <ReportsPage onSelectMember={handleSelectMember} />
           ) : (
             <DashboardPage

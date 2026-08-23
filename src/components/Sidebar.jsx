@@ -19,6 +19,8 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
   const { user, logout } = useAuth();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'SUPER_ADMIN';
+
   const allNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'members', label: 'Miembros', icon: Users },
@@ -30,7 +32,7 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
     { id: 'settings', label: 'Configuración', icon: Settings },
   ];
 
-  const navItems = allNavItems.filter(item => !item.adminOnly || user?.role === 'admin');
+  const navItems = allNavItems.filter(item => !item.adminOnly || isAdmin);
 
   const handleNavClick = (id) => {
     setActiveTab(id);
@@ -116,7 +118,7 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
                 {user?.name || 'Usuario'}
               </div>
               <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', textTransform: 'capitalize' }}>
-                {user?.role || 'Voluntario'}
+                {user?.role === 'superadmin' || user?.role === 'SUPER_ADMIN' ? 'SuperAdmin / Soporte' : (user?.role || 'Voluntario')}
               </div>
             </div>
           </div>

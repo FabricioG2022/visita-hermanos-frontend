@@ -33,6 +33,8 @@ export const getBadgeClass = (st) => {
 };
 
 export const MemberTable = ({ members, onSelectMember, onToggleFavorite, onEditMember, onDeleteMember, onQuickUpdateStatus, userRole }) => {
+  const isAdmin = userRole === 'admin' || userRole === 'superadmin' || userRole === 'SUPER_ADMIN';
+
   if (members.length === 0) {
     return (
       <div className="table-card" style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -92,7 +94,7 @@ export const MemberTable = ({ members, onSelectMember, onToggleFavorite, onEditM
                           <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }} title="Más de 6 meses sin visitas o actualización">
                             <Clock size={11} /> +6 meses sin contacto
                           </span>
-                          {onQuickUpdateStatus && userRole === 'admin' && (
+                          {onQuickUpdateStatus && isAdmin && (
                             <button
                               className="btn btn-secondary"
                               style={{ padding: '2px 8px', fontSize: '0.68rem', color: 'var(--text-dark)', border: '1px solid var(--border-color)' }}
@@ -135,7 +137,7 @@ export const MemberTable = ({ members, onSelectMember, onToggleFavorite, onEditM
                         Ver Perfil <ChevronRight size={14} />
                       </button>
 
-                      {userRole === 'admin' && (
+                      {isAdmin && (
                         <button
                           className="btn btn-secondary"
                           style={{ padding: '6px 10px', fontSize: '0.8rem' }}
@@ -149,7 +151,7 @@ export const MemberTable = ({ members, onSelectMember, onToggleFavorite, onEditM
                         </button>
                       )}
 
-                      {userRole === 'admin' && (
+                      {isAdmin && (
                         <button
                           className="btn btn-secondary"
                           style={{ padding: '6px 10px', fontSize: '0.8rem', color: '#dc2626' }}
@@ -251,7 +253,7 @@ export const MemberTable = ({ members, onSelectMember, onToggleFavorite, onEditM
                   Ver Perfil <ChevronRight size={14} />
                 </button>
 
-                {userRole === 'admin' && (
+                {isAdmin && (
                   <button
                     className="btn btn-secondary"
                     style={{ padding: '6px 10px', fontSize: '0.8rem' }}
@@ -265,7 +267,7 @@ export const MemberTable = ({ members, onSelectMember, onToggleFavorite, onEditM
                   </button>
                 )}
 
-                {userRole === 'admin' && (
+                {isAdmin && (
                   <button
                     className="btn btn-secondary"
                     style={{ padding: '6px 10px', fontSize: '0.8rem', color: '#dc2626' }}

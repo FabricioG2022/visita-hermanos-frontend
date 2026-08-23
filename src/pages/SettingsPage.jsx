@@ -29,7 +29,7 @@ export const SettingsPage = () => {
   const { user, updateUserProfile } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'SUPER_ADMIN';
   const [activeTab, setActiveTab] = useState(isAdmin ? 'users' : 'params');
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export const SettingsPage = () => {
 
   // Cargar usuarios para Sección A
   const fetchUsers = async () => {
-    if (user?.role !== 'admin') return;
+    if (!isAdmin) return;
     setLoadingUsers(true);
     try {
       const data = await api.getUsers();

@@ -29,6 +29,7 @@ import {
 
 export const MessagesPage = ({ onSelectMember }) => {
   const { user } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'SUPER_ADMIN';
   const [activeSubTab, setActiveSubTab] = useState('announcements');
   const [modalFeedback, setModalFeedback] = useState({ isOpen: false, title: '', message: '' });
 
@@ -529,7 +530,7 @@ export const MessagesPage = ({ onSelectMember }) => {
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Avisos Generales del Equipo</h3>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mensajes fijados por administración para todos los colaboradores</p>
               </div>
-              {user?.role === 'admin' && (
+              {isAdmin && (
                 <button className="btn btn-primary" onClick={handleOpenCreateAnnModal}>
                   <Plus size={18} /> Publicar Nuevo Aviso
                 </button>
@@ -553,7 +554,7 @@ export const MessagesPage = ({ onSelectMember }) => {
                         <h4 style={{ fontSize: '1.05rem', fontWeight: 800 }}>{ann.title}</h4>
                         <span className="badge-status badge-verde" style={{ fontSize: '0.75rem' }}>{ann.category}</span>
                       </div>
-                      {user?.role === 'admin' && (
+                      {isAdmin && (
                         <div style={{ display: 'flex', gap: '6px' }}>
                           <button 
                             className="star-btn" 
@@ -646,7 +647,7 @@ export const MessagesPage = ({ onSelectMember }) => {
               (req.recipientName && user?.name && req.recipientName.toLowerCase() === user.name.toLowerCase()) ||
               (req.recipient && user?.email && req.recipient.toLowerCase() === user.email.toLowerCase());
 
-            return isAuthor || isRecipient || user?.role === 'admin';
+            return isAuthor || isRecipient || isAdmin;
           });
 
           return (
@@ -677,7 +678,7 @@ export const MessagesPage = ({ onSelectMember }) => {
                       statusLower === 'rechazada' ? 'badge-rojo' : 'badge-amarillo';
 
                     const canManageStatus = statusLower === 'pendiente' && (
-                      user?.role === 'admin' ||
+                      isAdmin ||
                       (req.recipientName && req.recipientName.toLowerCase() === (user?.name || '').toLowerCase()) ||
                       (req.recipientId && String(req.recipientId) === String(user?.id || user?.uid)) ||
                       (!req.recipientName || req.recipientName === 'Todos')
@@ -1042,7 +1043,7 @@ export const MessagesPage = ({ onSelectMember }) => {
                   <option value="Todos">🌐 Todos (Solicitud o aviso para todo el equipo)</option>
                   {systemUsers.map(u => (
                     <option key={u.id || u.uid} value={u.name || u.email}>
-                      👤 {u.name || u.email} ({u.role === 'admin' ? 'Administrador' : 'Visitador'})
+                      👤 {u.name || u.email} ({u.role === 'admin' ? 'Administrador' : (u.role === 'superadmin' || u.role === 'SUPER_ADMIN') ? 'SuperAdmin / Soporte' : 'Visitador'})
                     </option>
                   ))}
                 </select>

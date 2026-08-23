@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { UserCheck, Lock, Mail, ArrowRight, KeyRound, CheckCircle, ArrowLeft, Shield } from 'lucide-react';
+import { api } from '../services/api';
+import { UserCheck, Lock, Mail, ArrowRight, KeyRound, CheckCircle, ArrowLeft, Shield, Loader2 } from 'lucide-react';
 
 export const LoginPage = () => {
   const { login, forgotPassword } = useAuth();
@@ -16,6 +17,25 @@ export const LoginPage = () => {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isWakingUp, setIsWakingUp] = useState(false);
+
+  // Pre-calentamiento silencioso del servidor apenas se abre la pantalla de Login
+  useEffect(() => {
+    api.ping();
+  }, []);
+
+  // Timer para avisar amigablemente al usuario si Render está saliendo de reposo (> 2.5 seg)
+  useEffect(() => {
+    let timer;
+    if (loading) {
+      timer = setTimeout(() => {
+        setIsWakingUp(true);
+      }, 2500);
+    } else {
+      setIsWakingUp(false);
+    }
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   const handleSubmitLogin = async (e) => {
     e.preventDefault();
@@ -147,10 +167,20 @@ export const LoginPage = () => {
             <button
               type="submit"
               className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center', marginTop: '12px' }}
+              style={{ width: '100%', justifyContent: 'center', marginTop: '12px', gap: '8px' }}
               disabled={loading}
             >
-              {loading ? 'Autenticando...' : 'Ingresar a la Plataforma'} <ArrowRight size={18} />
+              {loading ? (
+                <>
+                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>{isWakingUp ? 'Conectando (Despertando servidor)...' : 'Autenticando...'}</span>
+                </>
+              ) : (
+                <>
+                  <span>Ingresar a la Plataforma</span>
+                  <ArrowRight size={18} />
+                </>
+              )}
             </button>
 
             <div style={{

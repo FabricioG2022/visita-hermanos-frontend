@@ -176,12 +176,12 @@ export const MemberProfilePage = ({ member, onBack, onScheduleAppointment, onEdi
         subtitle="Ver detalles y acciones"
         actionButton={
           <div style={{ display: 'flex', gap: '10px' }}>
-            {user?.role === 'admin' && (
+            {(user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'SUPER_ADMIN') && (
               <button className="btn btn-secondary" onClick={() => onEditMember(member)}>
                 <Pencil size={16} /> Editar datos
               </button>
             )}
-            {user?.role === 'admin' && (
+            {(user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'SUPER_ADMIN') && (
               <button
                 className="btn btn-secondary"
                 style={{ color: '#dc2626' }}

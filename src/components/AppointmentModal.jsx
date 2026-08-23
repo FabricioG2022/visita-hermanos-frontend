@@ -254,7 +254,7 @@ export const AppointmentModal = ({ isOpen, onClose, onSubmit, member, members: i
               {responsiblesList.length > 0 ? (
                 responsiblesList.map(u => (
                   <option key={u.id || u.uid} value={u.name}>
-                    {u.name} ({u.role === 'admin' ? 'Administrador' : 'Visitador'})
+                    {u.name} ({u.role === 'admin' ? 'Administrador' : (u.role === 'superadmin' || u.role === 'SUPER_ADMIN') ? 'SuperAdmin / Soporte' : 'Visitador'})
                   </option>
                 ))
               ) : (

@@ -56,6 +56,14 @@ const getAuthHeaders = () => {
 
 export const api = {
   // Auth
+  ping: async () => {
+    try {
+      await fetch(`${API_BASE_URL}/auth/ping`, { method: 'GET' });
+    } catch (e) {
+      // Ignorar errores de pre-calentamiento silencioso
+    }
+  },
+
   login: async (email, password) => {
     const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
