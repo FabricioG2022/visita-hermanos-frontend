@@ -713,13 +713,13 @@ export const ReportsPage = ({ onSelectMember }) => {
                   </div>
                 ) : (
                   <>
-                    <div className="table-card" style={{ marginBottom: '0' }}>
-                      <table className="custom-table">
+                    <div className="table-card" style={{ marginBottom: '0', width: '100%', overflowX: 'auto' }}>
+                      <table className="custom-table reports-table">
                         <thead>
                           <tr>
-                            <th>Visitador / Colaborador</th>
-                            <th style={{ textAlign: 'center' }}>Visitas Realizadas</th>
-                            <th>Porcentaje del Total</th>
+                            <th>Visitador</th>
+                            <th style={{ textAlign: 'center' }}>Visitas</th>
+                            <th>% Total</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -728,22 +728,22 @@ export const ReportsPage = ({ onSelectMember }) => {
                             return (
                               <tr key={idx}>
                                 <td>
-                                  <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <div className="avatar-circle" style={{ width: '28px', height: '28px', fontSize: '0.75rem' }}>
+                                  <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <div className="avatar-circle" style={{ width: '26px', height: '26px', fontSize: '0.75rem', flexShrink: 0 }}>
                                       {vr.name ? vr.name.charAt(0).toUpperCase() : '?'}
                                     </div>
-                                    <span>{vr.name}</span>
+                                    <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{vr.name}</span>
                                   </div>
                                 </td>
                                 <td style={{ textAlign: 'center', fontWeight: 800, color: 'var(--primary)' }}>
                                   {vr.count}
                                 </td>
                                 <td>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <div style={{ flex: 1, height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <div style={{ flex: 1, minWidth: '30px', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
                                       <div style={{ width: `${pct}%`, height: '100%', background: 'var(--primary)' }} />
                                     </div>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{pct}%</span>
+                                    <span style={{ fontSize: '0.72rem', fontWeight: 600, flexShrink: 0 }}>{pct}%</span>
                                   </div>
                                 </td>
                               </tr>
@@ -788,7 +788,7 @@ export const ReportsPage = ({ onSelectMember }) => {
 
               {/* Cumplimiento de Citas */}
               <div className="dashboard-card">
-                <h3 className="card-title" style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 className="card-title" style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   <Calendar size={20} color="var(--primary)" /> Efectividad de Citas Programadas
                 </h3>
                 <p className="page-subtitle" style={{ marginBottom: '20px' }}>
@@ -819,9 +819,11 @@ export const ReportsPage = ({ onSelectMember }) => {
                 <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '10px' }}>Tipología de Visitas Realizadas:</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {visitTypeStats.map((vt, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem', background: 'var(--bg-main)', padding: '8px 12px', borderRadius: '6px' }}>
-                      <span>{vt.type}</span>
-                      <strong>{vt.count} ({vt.pct}%)</strong>
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem', background: 'var(--bg-main)', padding: '8px 12px', borderRadius: '6px', width: '100%', overflow: 'hidden' }}>
+                      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '8px' }}>
+                        {vt.type}
+                      </span>
+                      <strong style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>{vt.count} ({vt.pct}%)</strong>
                     </div>
                   ))}
                 </div>
