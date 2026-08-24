@@ -378,102 +378,199 @@ export const SettingsPage = () => {
               {loadingUsers ? (
                 <p style={{ color: 'var(--text-muted)', padding: '16px' }}>Cargando usuarios...</p>
               ) : (
-                <div className="table-card">
-                  <table className="custom-table">
-                    <thead>
-                      <tr>
-                        <th>Usuario</th>
-                        <th>Correo Electrónico</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th style={{ textAlign: 'center' }}>Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {usersList.length === 0 ? (
+                <>
+                  <div className="table-card desktop-only-table">
+                    <table className="custom-table">
+                      <thead>
                         <tr>
-                          <td colSpan="5" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
-                            No se encontraron colaboradores registrados.
-                          </td>
+                          <th>Usuario</th>
+                          <th>Correo Electrónico</th>
+                          <th>Rol</th>
+                          <th>Estado</th>
+                          <th style={{ textAlign: 'center' }}>Acciones</th>
                         </tr>
-                      ) : (
-                        usersList.map((u) => {
-                          const userId = u.id || u.uid;
-                          const isSelf = userId === user?.id || u.email === user?.email;
-                          const isSuperAdmin = (u.email && u.email.toLowerCase() === 'fabrigo2015@gmail.com') || u.role === 'superadmin' || u.role === 'SUPER_ADMIN';
+                      </thead>
+                      <tbody>
+                        {usersList.length === 0 ? (
+                          <tr>
+                            <td colSpan="5" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
+                              No se encontraron colaboradores registrados.
+                            </td>
+                          </tr>
+                        ) : (
+                          usersList.map((u) => {
+                            const userId = u.id || u.uid;
+                            const isSelf = userId === user?.id || u.email === user?.email;
+                            const isSuperAdmin = (u.email && u.email.toLowerCase() === 'fabrigo2015@gmail.com') || u.role === 'superadmin' || u.role === 'SUPER_ADMIN';
 
-                          return (
-                            <tr key={userId}>
-                              <td>
-                                <div className="member-cell">
-                                  <div className="avatar-circle" style={isSuperAdmin ? { background: '#4338ca', color: '#ffffff' } : {}}>
-                                    {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                            return (
+                              <tr key={userId}>
+                                <td>
+                                  <div className="member-cell">
+                                    <div className="avatar-circle" style={isSuperAdmin ? { background: '#4338ca', color: '#ffffff' } : {}}>
+                                      {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                                    </div>
+                                    <div>
+                                      {u.name || 'Usuario'}
+                                      {isSuperAdmin && (
+                                        <span style={{ fontSize: '0.7rem', color: '#4338ca', marginLeft: '6px', fontWeight: 700 }}>
+                                          (Principal)
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div>
-                                    {u.name || 'Usuario'}
-                                    {isSuperAdmin && (
-                                      <span style={{ fontSize: '0.7rem', color: '#4338ca', marginLeft: '6px', fontWeight: 700 }}>
-                                        (Principal)
-                                      </span>
-                                    )}
-                                  </div>
+                                </td>
+                                <td>{u.email}</td>
+                                <td>
+                                  {isSuperAdmin ? (
+                                    <span className="badge-status" style={{ background: '#e0e7ff', color: '#3730a3', borderColor: '#c7d2fe', fontWeight: 700 }}>
+                                      SuperAdmin / Soporte
+                                    </span>
+                                  ) : (
+                                    <span className={`badge-status ${u.role === 'admin' ? 'badge-verde' : 'badge-active'}`}>
+                                      {u.role === 'admin' ? 'Administrador' : 'Visitador'}
+                                    </span>
+                                  )}
+                                </td>
+                                <td>
+                                  {u.active !== false ? (
+                                    <span className="badge-status badge-active">Activo</span>
+                                  ) : (
+                                    <span className="badge-status" style={{ background: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5' }}>Inhabilitado</span>
+                                  )}
+                                </td>
+                                <td style={{ textAlign: 'center' }}>
+                                  {isSuperAdmin ? (
+                                    <span style={{ fontSize: '0.75rem', color: '#4338ca', fontWeight: 700, fontStyle: 'italic', background: '#e0e7ff', padding: '4px 8px', borderRadius: '6px' }}>
+                                      🔒 Protegido (Soporte)
+                                    </span>
+                                  ) : isSelf ? (
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Tu cuenta</span>
+                                  ) : (
+                                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                      <button
+                                        className="star-btn"
+                                        title={u.active !== false ? "Inhabilitar acceso del usuario" : "Reactivar acceso del usuario"}
+                                        style={{ padding: '6px', borderRadius: '6px', cursor: 'pointer', background: u.active !== false ? '#fef3c7' : '#dcfce7' }}
+                                        onClick={() => handleToggleUserStatus(u)}
+                                      >
+                                        {u.active !== false ? <UserX size={16} color="#d97706" /> : <UserCheck size={16} color="#16a34a" />}
+                                      </button>
+
+                                      <button
+                                        className="star-btn"
+                                        title="Dar de baja definitiva"
+                                        style={{ padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
+                                        onClick={() => setUserToDelete(u)}
+                                      >
+                                        <Trash2 size={16} color="#dc2626" />
+                                      </button>
+                                    </div>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Vista de Tarjetas para Celulares en Usuarios del Sistema */}
+                  <div className="mobile-only-cards">
+                    {usersList.length === 0 ? (
+                      <div className="mobile-record-card" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>
+                        No se encontraron colaboradores registrados.
+                      </div>
+                    ) : (
+                      usersList.map((u) => {
+                        const userId = u.id || u.uid;
+                        const isSelf = userId === user?.id || u.email === user?.email;
+                        const isSuperAdmin = (u.email && u.email.toLowerCase() === 'fabrigo2015@gmail.com') || u.role === 'superadmin' || u.role === 'SUPER_ADMIN';
+
+                        return (
+                          <div key={userId} className="mobile-record-card">
+                            <div className="mobile-card-header">
+                              <div className="member-cell">
+                                <div className="avatar-circle" style={isSuperAdmin ? { background: '#4338ca', color: '#ffffff' } : {}}>
+                                  {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
                                 </div>
-                              </td>
-                              <td>{u.email}</td>
-                              <td>
-                                {isSuperAdmin ? (
-                                  <span className="badge-status" style={{ background: '#e0e7ff', color: '#3730a3', borderColor: '#c7d2fe', fontWeight: 700 }}>
-                                    SuperAdmin / Soporte
-                                  </span>
-                                ) : (
-                                  <span className={`badge-status ${u.role === 'admin' ? 'badge-verde' : 'badge-active'}`}>
-                                    {u.role === 'admin' ? 'Administrador' : 'Visitador'}
-                                  </span>
-                                )}
-                              </td>
-                              <td>
-                                {u.active !== false ? (
-                                  <span className="badge-status badge-active">Activo</span>
-                                ) : (
-                                  <span className="badge-status" style={{ background: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5' }}>Inhabilitado</span>
-                                )}
-                              </td>
-                              <td style={{ textAlign: 'center' }}>
-                                {isSuperAdmin ? (
-                                  <span style={{ fontSize: '0.75rem', color: '#4338ca', fontWeight: 700, fontStyle: 'italic', background: '#e0e7ff', padding: '4px 8px', borderRadius: '6px' }}>
-                                    🔒 Protegido (Soporte)
-                                  </span>
-                                ) : isSelf ? (
-                                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Tu cuenta</span>
-                                ) : (
-                                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                    <button
-                                      className="star-btn"
-                                      title={u.active !== false ? "Inhabilitar acceso del usuario" : "Reactivar acceso del usuario"}
-                                      style={{ padding: '6px', borderRadius: '6px', cursor: 'pointer', background: u.active !== false ? '#fef3c7' : '#dcfce7' }}
-                                      onClick={() => handleToggleUserStatus(u)}
-                                    >
-                                      {u.active !== false ? <UserX size={16} color="#d97706" /> : <UserCheck size={16} color="#16a34a" />}
-                                    </button>
-
-                                    <button
-                                      className="star-btn"
-                                      title="Dar de baja definitiva"
-                                      style={{ padding: '6px', borderRadius: '6px', cursor: 'pointer' }}
-                                      onClick={() => setUserToDelete(u)}
-                                    >
-                                      <Trash2 size={16} color="#dc2626" />
-                                    </button>
+                                <div>
+                                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-dark)' }}>
+                                    {u.name || 'Usuario'}
                                   </div>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                                  {isSuperAdmin && (
+                                    <span style={{ fontSize: '0.7rem', color: '#4338ca', fontWeight: 700 }}>
+                                      (Principal)
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {u.active !== false ? (
+                                <span className="badge-status badge-active">Activo</span>
+                              ) : (
+                                <span className="badge-status" style={{ background: '#fee2e2', color: '#dc2626' }}>Inhabilitado</span>
+                              )}
+                            </div>
+
+                            <div className="mobile-card-body">
+                              <div className="mobile-card-row">
+                                <span className="mobile-card-label">Email:</span>
+                                <span className="mobile-card-value" style={{ wordBreak: 'break-all' }}>{u.email}</span>
+                              </div>
+
+                              <div className="mobile-card-row">
+                                <span className="mobile-card-label">Rol:</span>
+                                <span className="mobile-card-value">
+                                  {isSuperAdmin ? (
+                                    <span className="badge-status" style={{ background: '#e0e7ff', color: '#3730a3', fontWeight: 700 }}>
+                                      SuperAdmin
+                                    </span>
+                                  ) : (
+                                    <span className={`badge-status ${u.role === 'admin' ? 'badge-verde' : 'badge-active'}`}>
+                                      {u.role === 'admin' ? 'Administrador' : 'Visitador'}
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="mobile-card-actions">
+                              {isSuperAdmin ? (
+                                <span style={{ fontSize: '0.75rem', color: '#4338ca', fontWeight: 700, fontStyle: 'italic' }}>
+                                  🔒 Protegido (Soporte)
+                                </span>
+                              ) : isSelf ? (
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Tu cuenta</span>
+                              ) : (
+                                <div style={{ display: 'flex', gap: '8px', width: '100%', justifyContent: 'flex-end' }}>
+                                  <button
+                                    className="btn btn-secondary"
+                                    style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                                    onClick={() => handleToggleUserStatus(u)}
+                                  >
+                                    {u.active !== false ? <UserX size={16} color="#d97706" /> : <UserCheck size={16} color="#16a34a" />}
+                                    {u.active !== false ? 'Inhabilitar' : 'Reactivar'}
+                                  </button>
+
+                                  <button
+                                    className="btn btn-secondary"
+                                    style={{ padding: '6px 12px', fontSize: '0.8rem', color: '#dc2626' }}
+                                    onClick={() => setUserToDelete(u)}
+                                  >
+                                    <Trash2 size={16} color="#dc2626" />
+                                    Eliminar
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </>
               )}
             </div>
 
@@ -482,8 +579,8 @@ export const SettingsPage = () => {
               <h3 className="card-title" style={{ marginBottom: '14px' }}>Matriz de Roles y Permisos</h3>
               <p className="page-subtitle" style={{ marginBottom: '20px' }}>Definición de alcance y capacidades por tipo de rol en el sistema</p>
 
-              <div className="table-card">
-                <table className="custom-table">
+              <div className="table-card" style={{ overflowX: 'auto' }}>
+                <table className="custom-table" style={{ minWidth: '550px' }}>
                   <thead>
                     <tr>
                       <th>Módulo / Funcionalidad</th>

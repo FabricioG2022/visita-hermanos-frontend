@@ -180,25 +180,12 @@ export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToV
 
             {/* Controles de Paginación */}
             {allVisits.length > 0 && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginTop: '20px',
-                padding: '12px 16px',
-                background: 'var(--card-bg, #ffffff)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '12px',
-                fontSize: '0.85rem',
-                color: 'var(--text-muted)',
-                flexWrap: 'wrap',
-                gap: '10px'
-              }}>
+              <div className="pagination-container">
                 <span>
                   Mostrando <strong>{(validPage - 1) * ITEMS_PER_PAGE + 1}</strong> a <strong>{Math.min(validPage * ITEMS_PER_PAGE, allVisits.length)}</strong> de <strong>{allVisits.length}</strong> visitas registradas
                 </span>
 
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <div className="pagination-controls">
                   <button
                     type="button"
                     className="btn btn-secondary"

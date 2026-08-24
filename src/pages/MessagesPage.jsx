@@ -889,23 +889,12 @@ export const MessagesPage = ({ onSelectMember }) => {
                   </div>
 
                   {/* Control de Paginación */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginTop: '16px',
-                    paddingTop: '12px',
-                    borderTop: '1px solid var(--border-color)',
-                    fontSize: '0.82rem',
-                    color: 'var(--text-muted)',
-                    flexWrap: 'wrap',
-                    gap: '10px'
-                  }}>
+                  <div className="pagination-container" style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
                     <span>
                       Página <strong>{currentLogPage}</strong> de <strong>{totalLogPages}</strong> ({filteredLogs.length} mensajes)
                     </span>
 
-                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                    <div className="pagination-controls">
                       <button
                         type="button"
                         className="btn btn-secondary"

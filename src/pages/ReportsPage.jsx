@@ -645,20 +645,11 @@ export const ReportsPage = ({ onSelectMember }) => {
                     </div>
 
                     {/* Controles de Paginación del Radar */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginTop: '12px',
-                      paddingTop: '8px',
-                      borderTop: '1px solid var(--border-color)',
-                      fontSize: '0.78rem',
-                      color: 'var(--text-muted)'
-                    }}>
+                    <div className="pagination-container" style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid var(--border-color)', fontSize: '0.78rem' }}>
                       <span>
                         Mostrando <strong>{(priorityValidPage - 1) * PRIORITY_PER_PAGE + 1}</strong> a <strong>{Math.min(priorityValidPage * PRIORITY_PER_PAGE, filteredPriorityMembers.length)}</strong> de <strong>{filteredPriorityMembers.length}</strong>
                       </span>
-                      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                      <div className="pagination-controls" style={{ gap: '4px' }}>
                         <button
                           type="button"
                           className="btn btn-secondary"
@@ -763,20 +754,11 @@ export const ReportsPage = ({ onSelectMember }) => {
                     </div>
 
                     {/* Controles de Paginación de Visitadores */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginTop: '12px',
-                      paddingTop: '8px',
-                      borderTop: '1px solid var(--border-color)',
-                      fontSize: '0.78rem',
-                      color: 'var(--text-muted)'
-                    }}>
+                    <div className="pagination-container" style={{ marginTop: '12px', paddingTop: '8px', borderTop: '1px solid var(--border-color)', fontSize: '0.78rem' }}>
                       <span>
                         Mostrando <strong>{(visitadorValidPage - 1) * VISITADOR_PER_PAGE + 1}</strong> a <strong>{Math.min(visitadorValidPage * VISITADOR_PER_PAGE, filteredVisitadorRanking.length)}</strong> de <strong>{filteredVisitadorRanking.length}</strong> visitadores
                       </span>
-                      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                      <div className="pagination-controls" style={{ gap: '4px' }}>
                         <button
                           type="button"
                           className="btn btn-secondary"
@@ -813,23 +795,23 @@ export const ReportsPage = ({ onSelectMember }) => {
                   Estado de la agenda ({appointmentStats.total} citas en total)
                 </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-                  <div style={{ background: '#dcfce7', border: '1px solid #86efac', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
+                <div className="reports-stats-grid">
+                  <div className="reports-stat-box" style={{ background: '#dcfce7', border: '1px solid #86efac', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
                     <CheckCircle2 size={24} color="#16a34a" style={{ marginBottom: '4px' }} />
-                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803d' }}>{appointmentStats.realizadas}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>Realizadas</div>
+                    <div className="stat-value" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#15803d' }}>{appointmentStats.realizadas}</div>
+                    <div className="stat-label" style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>Realizadas</div>
                   </div>
 
-                  <div style={{ background: '#fef3c7', border: '1px solid #fde047', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
+                  <div className="reports-stat-box" style={{ background: '#fef3c7', border: '1px solid #fde047', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
                     <Clock size={24} color="#d97706" style={{ marginBottom: '4px' }} />
-                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#b45309' }}>{appointmentStats.pendientes}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 600 }}>Pendientes</div>
+                    <div className="stat-value" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#b45309' }}>{appointmentStats.pendientes}</div>
+                    <div className="stat-label" style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 600 }}>Pendientes</div>
                   </div>
 
-                  <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
+                  <div className="reports-stat-box" style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '10px', padding: '14px', textAlign: 'center' }}>
                     <XCircle size={24} color="#dc2626" style={{ marginBottom: '4px' }} />
-                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#b91c1c' }}>{appointmentStats.canceladas}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#991b1b', fontWeight: 600 }}>Canceladas</div>
+                    <div className="stat-value" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#b91c1c' }}>{appointmentStats.canceladas}</div>
+                    <div className="stat-label" style={{ fontSize: '0.75rem', color: '#991b1b', fontWeight: 600 }}>Canceladas</div>
                   </div>
                 </div>
 

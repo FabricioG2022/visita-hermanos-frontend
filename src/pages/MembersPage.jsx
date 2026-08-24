@@ -298,25 +298,12 @@ export const MembersPage = ({ onSelectMember, initialFilter = 'all' }) => {
             />
 
             {/* Controles de Paginación */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginTop: '20px',
-              padding: '12px 16px',
-              background: 'var(--card-bg, #ffffff)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '12px',
-              fontSize: '0.85rem',
-              color: 'var(--text-muted)',
-              flexWrap: 'wrap',
-              gap: '10px'
-            }}>
+            <div className="pagination-container">
               <span>
                 Mostrando <strong>{paginatedMembers.length > 0 ? (validCurrentPage - 1) * ITEMS_PER_PAGE + 1 : 0}</strong> a <strong>{Math.min(validCurrentPage * ITEMS_PER_PAGE, sortedMembers.length)}</strong> de <strong>{sortedMembers.length}</strong> miembros registrados
               </span>
 
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <div className="pagination-controls">
                 <button
                   type="button"
                   className="btn btn-secondary"
