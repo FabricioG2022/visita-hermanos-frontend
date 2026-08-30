@@ -81,6 +81,8 @@ const getAuthHeaders = () => {
 };
 
 export const api = {
+  clearCache: clearClientCache,
+
   // Auth
   ping: async () => {
     try {

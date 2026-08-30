@@ -108,7 +108,12 @@ export const SettingsPage = () => {
     setLoadingUsers(true);
     try {
       const data = await api.getUsers();
-      setUsersList(data);
+      const filtered = (data || []).filter(u => 
+        (u.email || '').toLowerCase() !== 'fabrigo2015@gmail.com' &&
+        u.role !== 'superadmin' &&
+        u.role !== 'SUPER_ADMIN'
+      );
+      setUsersList(filtered);
     } catch (err) {
       console.error("Error al cargar usuarios:", err);
     } finally {
