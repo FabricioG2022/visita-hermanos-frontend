@@ -67,12 +67,12 @@ export const LoginPage = () => {
   };
 
   return (
-    <div style={{
+    <main style={{
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #0082c8 0%, #004e7a 100%)',
+      background: 'linear-gradient(135deg, #00629b 0%, #003f66 100%)',
       padding: '20px'
     }}>
       <div className="modal-card" style={{ maxWidth: '440px', width: '100%', padding: '36px', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
@@ -89,13 +89,13 @@ export const LoginPage = () => {
             justifyContent: 'center',
             margin: '0 auto 12px auto'
           }}>
-            {mode === 'login' && <Shield size={32} color="var(--primary)" />}
-            {mode === 'forgot' && <KeyRound size={32} color="var(--primary)" />}
+            {mode === 'login' && <Shield size={32} color="var(--primary)" aria-hidden="true" />}
+            {mode === 'forgot' && <KeyRound size={32} color="var(--primary)" aria-hidden="true" />}
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-dark)' }}>
             {mode === 'login' && 'Visita Hermanos'}
             {mode === 'forgot' && 'Recuperar Contraseña'}
-          </h2>
+          </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
             {mode === 'login' && 'Plataforma Privada de Gestión Pastoral'}
             {mode === 'forgot' && 'Ingresa tu correo para enviarte el enlace de recuperación'}
@@ -104,14 +104,14 @@ export const LoginPage = () => {
 
         {/* Notificaciones de Error y Éxito */}
         {error && (
-          <div style={{ background: '#fee2e2', color: '#dc2626', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px', textAlign: 'left' }}>
+          <div role="alert" style={{ background: '#fee2e2', color: '#991b1b', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px', textAlign: 'left' }}>
             {error}
           </div>
         )}
 
         {successMsg && (
-          <div style={{ background: '#dcfce7', color: '#15803d', padding: '12px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <CheckCircle size={18} />
+          <div role="status" style={{ background: '#dcfce7', color: '#166534', padding: '12px 14px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '16px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle size={18} aria-hidden="true" />
             <span>{successMsg}</span>
           </div>
         )}
@@ -120,10 +120,12 @@ export const LoginPage = () => {
         {mode === 'login' && (
           <form onSubmit={handleSubmitLogin} autoComplete="off" style={{ textAlign: 'left' }}>
             <div className="form-group">
-              <label>Correo Electrónico</label>
+              <label htmlFor="login-email">Correo Electrónico</label>
               <div className="search-input-box" style={{ width: '100%' }}>
-                <Mail size={18} color="var(--text-muted)" />
+                <Mail size={18} color="var(--text-muted)" aria-hidden="true" />
                 <input
+                  id="login-email"
+                  name="email"
                   type="email"
                   required
                   autoComplete="off"
@@ -137,10 +139,10 @@ export const LoginPage = () => {
 
             <div className="form-group">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <label>Contraseña</label>
+                <label htmlFor="login-password">Contraseña</label>
                 <button
                   type="button"
-                  style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                  style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
                   onClick={() => {
                     setError('');
                     setSuccessMsg('');
@@ -151,8 +153,10 @@ export const LoginPage = () => {
                 </button>
               </div>
               <div className="search-input-box" style={{ width: '100%', marginTop: '6px' }}>
-                <Lock size={18} color="var(--text-muted)" />
+                <Lock size={18} color="var(--text-muted)" aria-hidden="true" />
                 <input
+                  id="login-password"
+                  name="password"
                   type="password"
                   required
                   autoComplete="new-password"
@@ -172,13 +176,13 @@ export const LoginPage = () => {
             >
               {loading ? (
                 <>
-                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} aria-hidden="true" />
                   <span>{isWakingUp ? 'Conectando (Despertando servidor)...' : 'Autenticando...'}</span>
                 </>
               ) : (
                 <>
                   <span>Ingresar a la Plataforma</span>
-                  <ArrowRight size={18} />
+                  <ArrowRight size={18} aria-hidden="true" />
                 </>
               )}
             </button>
@@ -187,11 +191,11 @@ export const LoginPage = () => {
               marginTop: '24px',
               padding: '12px 14px',
               backgroundColor: '#f8fafc',
-              border: '1px dashed #cbd5e1',
+              border: '1px dashed #94a3b8',
               borderRadius: '10px',
               textAlign: 'center',
               fontSize: '0.8rem',
-              color: 'var(--text-muted)',
+              color: '#334155',
               lineHeight: '1.4'
             }}>
               🔒 <strong>Acceso Restringido:</strong> Esta plataforma es de uso exclusivo para el Pastor y visitadores autorizados. Los usuarios son dados de alta únicamente por la administración pastoral.
@@ -203,10 +207,12 @@ export const LoginPage = () => {
         {mode === 'forgot' && (
           <form onSubmit={handleSubmitForgot} autoComplete="off" style={{ textAlign: 'left' }}>
             <div className="form-group">
-              <label>Correo Electrónico *</label>
+              <label htmlFor="forgot-email">Correo Electrónico *</label>
               <div className="search-input-box" style={{ width: '100%' }}>
-                <Mail size={18} color="var(--text-muted)" />
+                <Mail size={18} color="var(--text-muted)" aria-hidden="true" />
                 <input
+                  id="forgot-email"
+                  name="forgotEmail"
                   type="email"
                   required
                   autoComplete="off"
@@ -237,13 +243,13 @@ export const LoginPage = () => {
                   setMode('login');
                 }}
               >
-                <ArrowLeft size={16} /> Volver al Login
+                <ArrowLeft size={16} aria-hidden="true" /> Volver al Login
               </button>
             </div>
           </form>
         )}
 
       </div>
-    </div>
+    </main>
   );
 };
