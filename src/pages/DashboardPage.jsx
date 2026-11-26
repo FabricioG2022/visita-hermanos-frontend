@@ -4,12 +4,13 @@ import { MetricCard } from '../components/MetricCard';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { getBadgeClass } from '../components/MemberTable';
-import { Users, MapPin, Star, AlertTriangle, CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Users, MapPin, Calendar, Star, AlertTriangle, CheckCircle2, ChevronRight, ChevronLeft } from 'lucide-react';
 
-export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToVisits }) => {
+export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToVisits, onNavigateToAppointments, appointmentsVersion = 0 }) => {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [allVisits, setAllVisits] = useState([]);
+  const [appointmentsCount, setAppointmentsCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Paginación
@@ -36,12 +37,16 @@ export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToV
     const fetchDashboard = async () => {
       try {
         setLoading(true);
-        const [statsData, visitsData] = await Promise.all([
+        const [statsData, visitsData, appointmentsData] = await Promise.all([
           api.getDashboardStats().catch(() => null),
-          api.getVisits().catch(() => [])
+          api.getVisits().catch(() => []),
+          api.getAppointments().catch(() => [])
         ]);
 
         setStats(statsData);
+        if (Array.isArray(appointmentsData)) {
+          setAppointmentsCount(appointmentsData.length);
+        }
 
         // Mapear y ordenar todas las visitas desde la fecha actual hacia atrás en el tiempo
         let rawVisits = [];
@@ -73,7 +78,7 @@ export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToV
       }
     };
     fetchDashboard();
-  }, []);
+  }, [appointmentsVersion]);
 
   if (loading) {
     return <div style={{ padding: '30px' }}>Cargando Dashboard...</div>;
@@ -107,13 +112,26 @@ export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToV
             value={totalVisits || allVisits.length}
             subtext="Ver historial de visitas"
             icon={MapPin}
+            iconColor="#00629b"
+            iconBg="#e0f2fe"
             onClick={() => onNavigateToVisits ? onNavigateToVisits() : null}
+          />
+          <MetricCard
+            title="Citas"
+            value={appointmentsCount}
+            subtext="Ver agenda y programar citas"
+            icon={Calendar}
+            iconColor="#00629b"
+            iconBg="#e0f2fe"
+            onClick={() => onNavigateToAppointments ? onNavigateToAppointments() : null}
           />
           <MetricCard
             title="Favoritos"
             value={favorites}
             subtext="Ver miembros destacados"
             icon={Star}
+            iconColor="#d97706"
+            iconBg="#fef3c7"
             onClick={() => onNavigateToMembers('favorites')}
           />
           <MetricCard
@@ -121,6 +139,8 @@ export const DashboardPage = ({ onNavigateToMembers, onViewMember, onNavigateToV
             value={necesitanAtencion}
             subtext="Ver miembros en estado rojo"
             icon={AlertTriangle}
+            iconColor="#dc2626"
+            iconBg="#fee2e2"
             onClick={() => onNavigateToMembers('urgent')}
           />
         </div>

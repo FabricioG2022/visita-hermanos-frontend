@@ -48,9 +48,10 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
         <button 
           className="mobile-menu-btn" 
           onClick={() => setIsMobileOpen(!isMobileOpen)}
-          aria-label="Abrir menú"
+          aria-label="Abrir menú de navegación"
         >
-          {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
+          <span className="mobile-menu-label">Menú</span>
         </button>
 
         <div className="mobile-topbar-title">

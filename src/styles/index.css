@@ -769,15 +769,25 @@ textarea:disabled {
   }
 
   .mobile-menu-btn {
-    background: transparent;
-    border: none;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: #ffffff;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px;
-    border-radius: 6px;
+    gap: 6px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .mobile-menu-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
   }
 
   .mobile-topbar-title {
@@ -876,6 +886,101 @@ textarea:disabled {
   .dashboard-card {
     padding: 16px;
   }
+}
+
+/* Botonera de filtros rápidos de estado de Citas (UX-02) y fondo suave de tarjetas (UX-04) */
+.appointment-status-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.appointment-filter-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.status-pills-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status-filter-btn {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-filter-btn:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.status-filter-btn.active {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 98, 155, 0.25);
+}
+
+/* Color suave diferenciador para tarjetas y filas de citas (UX-04) */
+.appointment-table-row {
+  background-color: #f0f7ff;
+  transition: background-color 0.15s ease;
+}
+
+.appointment-table-row.status-realizada {
+  background-color: #f0fdf4;
+}
+
+.appointment-table-row.status-cancelada {
+  background-color: #fef2f2;
+}
+
+.appointment-table-row:hover {
+  filter: brightness(0.98);
+}
+
+.mobile-record-card.appointment-card {
+  background-color: #f0f7ff !important;
+  border-left: 4px solid var(--primary) !important;
+}
+
+.mobile-record-card.appointment-card.status-realizada {
+  background-color: #f0fdf4 !important;
+  border-left-color: #16a34a !important;
+}
+
+.mobile-record-card.appointment-card.status-cancelada {
+  background-color: #fef2f2 !important;
+  border-left-color: #dc2626 !important;
+}
+
+body.dark-mode .appointment-table-row,
+body.dark-mode .mobile-record-card.appointment-card {
+  background-color: rgba(30, 58, 138, 0.25) !important;
+}
+
+body.dark-mode .appointment-table-row.status-realizada,
+body.dark-mode .mobile-record-card.appointment-card.status-realizada {
+  background-color: rgba(20, 83, 45, 0.25) !important;
+}
+
+body.dark-mode .appointment-table-row.status-cancelada,
+body.dark-mode .mobile-record-card.appointment-card.status-cancelada {
+  background-color: rgba(127, 29, 29, 0.25) !important;
 }
 
 /* Tablas de Reportes Adaptables a Móviles */

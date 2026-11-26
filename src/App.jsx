@@ -247,7 +247,9 @@ const AppContent = () => {
             onNavigateToMembers={handleNavigateToMembersWithFilter}
             onViewMember={handleViewRecentVisitMember}
             onNavigateToVisits={() => navigateToTab('visits')}
+            onNavigateToAppointments={() => navigateToTab('appointments')}
             onScheduleAppointment={() => handleScheduleAppointment(null)}
+            appointmentsVersion={appointmentsVersion}
           />
         )}
 

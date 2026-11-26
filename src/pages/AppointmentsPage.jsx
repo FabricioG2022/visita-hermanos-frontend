@@ -97,21 +97,25 @@ export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appoin
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-              Estado:
+          <div className="appointment-status-filters" role="group" aria-label="Filtrar citas por estado">
+            <span className="appointment-filter-label">Estado:</span>
+            <div className="status-pills-group">
+              {[
+                { value: 'all', label: 'Todas' },
+                { value: 'pendiente', label: 'Pendientes' },
+                { value: 'realizada', label: 'Realizadas' },
+                { value: 'cancelada', label: 'Canceladas' }
+              ].map(option => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`status-filter-btn ${statusFilter === option.value ? 'active' : ''}`}
+                  onClick={() => setStatusFilter(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
-            <select
-              className="form-control"
-              style={{ width: 'auto', padding: '8px 14px', fontWeight: 600 }}
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">Todas las citas</option>
-              <option value="pendiente">Pendientes</option>
-              <option value="realizada">Realizadas</option>
-              <option value="cancelada">Canceladas</option>
-            </select>
           </div>
         </div>
 
@@ -157,7 +161,7 @@ export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appoin
                       statusLower === 'cancelada' ? 'badge-rojo' : 'badge-amarillo';
 
                     return (
-                      <tr key={a.id}>
+                      <tr key={a.id} className={`appointment-table-row status-${statusLower}`}>
                         <td>
                           <div style={{ fontWeight: 700, color: 'var(--text-dark)' }}>
                             {a.memberName || 'Miembro General'}
@@ -243,7 +247,7 @@ export const AppointmentsPage = ({ onScheduleAppointment, onSelectMember, appoin
                   statusLower === 'cancelada' ? 'badge-rojo' : 'badge-amarillo';
 
                 return (
-                  <div key={a.id} className="mobile-record-card">
+                  <div key={a.id} className={`mobile-record-card appointment-card status-${statusLower}`}>
                     <div className="mobile-card-header">
                       <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-dark)' }}>
                         {a.memberName || 'Miembro General'}

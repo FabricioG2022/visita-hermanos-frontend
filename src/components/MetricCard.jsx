@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const MetricCard = ({ title, value, subtext, icon: Icon, onClick }) => {
+export const MetricCard = ({ title, value, subtext, icon: Icon, iconColor, iconBg, onClick }) => {
   return (
     <div 
       className="metric-card"
@@ -13,7 +13,7 @@ export const MetricCard = ({ title, value, subtext, icon: Icon, onClick }) => {
       onMouseEnter={(e) => {
         if (onClick) {
           e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.borderColor = 'var(--primary)';
+          e.currentTarget.style.borderColor = iconColor || 'var(--primary)';
           e.currentTarget.style.boxShadow = '0 6px 16px rgba(37, 99, 235, 0.12)';
         }
       }}
@@ -28,7 +28,17 @@ export const MetricCard = ({ title, value, subtext, icon: Icon, onClick }) => {
       <div className="metric-header">
         <span className="metric-title">{title}</span>
         {Icon && (
-          <div className="metric-icon-box">
+          <div
+            className="metric-icon-box"
+            style={
+              iconColor || iconBg
+                ? {
+                    color: iconColor || 'var(--primary)',
+                    backgroundColor: iconBg || 'var(--primary-light)'
+                  }
+                : undefined
+            }
+          >
             <Icon size={20} />
           </div>
         )}
